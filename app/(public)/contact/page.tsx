@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Phone, Mail, MapPin, Clock, CheckCircle } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -31,10 +32,10 @@ export default function ContactPage() {
   }
 
   const contactInfo = [
-    { icon: Phone, label: "Phone", value: "+91 85297 16474", href: "tel:+918529716474" },
-    { icon: Mail, label: "Email", value: "info@communityfoundation.in", href: "mailto:info@communityfoundation.in" },
-    { icon: MapPin, label: "Office", value: "Shyam Vihar Kakrola, South West Delhi, Delhi 110078" },
-    { icon: Clock, label: "Hours", value: "Mon–Sat: 9 AM – 6 PM IST" },
+    { icon: Phone, label: "Phone", value: SITE.contact.phoneDisplay, href: SITE.contact.phoneHref },
+    { icon: Mail, label: "Email", value: SITE.contact.email, href: `mailto:${SITE.contact.email}` },
+    { icon: MapPin, label: "Office", value: SITE.contact.address },
+    { icon: Clock, label: "Hours", value: SITE.contact.hours },
   ];
 
   return (
@@ -70,8 +71,8 @@ export default function ContactPage() {
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl h-48 flex items-center justify-center border border-gray-100">
               <div className="text-center">
                 <div className="text-4xl mb-2">🗺️</div>
-                <p className="text-sm text-gray-500 font-medium">Bihar, India</p>
-                <p className="text-xs text-gray-400">Google Maps integration coming soon</p>
+                <p className="text-sm text-gray-500 font-medium">{SITE.contact.address}</p>
+                <p className="text-xs text-gray-400">27 locations across 13 states and UTs</p>
               </div>
             </div>
           </div>

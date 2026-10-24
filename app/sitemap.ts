@@ -1,30 +1,19 @@
 import { MetadataRoute } from "next";
-import { prisma } from "@/lib/prisma";
+import { SITE } from "@/lib/site";
+import { PROJECTS } from "@/lib/content";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://communityfoundation.in";
-
-  // const  projects = await Promise.all([
-  //   // prisma.campaign.findMany({ select: { slug: true, updatedAt: true }, where: { status: "ACTIVE" } }),
-  //   prisma.project.findMany({ select: { slug: true, updatedAt: true } }),
-  // ]);
-
-  const projects = await prisma.project.findMany({
-  select: { slug: true, updatedAt: true },
-});
-
+export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
-    { url: "/", priority: 1.0, freq: "daily" },
+    { url: "/", priority: 1.0, freq: "weekly" },
     { url: "/about", priority: 0.9, freq: "monthly" },
+    { url: "/team", priority: 0.7, freq: "monthly" },
+    { url: "/verticals", priority: 0.9, freq: "monthly" },
     { url: "/vision-mission", priority: 0.8, freq: "monthly" },
-    // { url: "/campaigns", priority: 0.9, freq: "daily" },
     { url: "/projects", priority: 0.8, freq: "weekly" },
-    // { url: "/fund-predictor", priority: 0.7, freq: "monthly" },
-    { url: "/impact", priority: 0.8, freq: "weekly" },
+    { url: "/impact", priority: 0.8, freq: "monthly" },
     { url: "/volunteer", priority: 0.8, freq: "monthly" },
-    { url: "/donate", priority: 1.0, freq: "daily" },
+    { url: "/donate", priority: 1.0, freq: "monthly" },
     { url: "/contact", priority: 0.7, freq: "monthly" },
-    { url: "/news", priority: 0.7, freq: "weekly" },
     { url: "/gallery", priority: 0.6, freq: "monthly" },
     { url: "/privacy-policy", priority: 0.3, freq: "yearly" },
     { url: "/terms-and-conditions", priority: 0.3, freq: "yearly" },
@@ -33,20 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes.map(({ url, priority, freq }) => ({
-      url: `${baseUrl}${url}`,
-      changeFrequency: freq as any,
+      url: `${SITE.url}${url}`,
+      changeFrequency: freq as MetadataRoute.Sitemap[number]["changeFrequency"],
       priority,
     })),
-    // ...campaigns.map((c) => ({
-    //   url: `${baseUrl}/campaigns/${c.slug}`,
-    //   lastModified: c.updatedAt,
-    //   changeFrequency: "daily" as const,
-    //   priority: 0.9,
-    // })),
-    ...projects.map((p) => ({
-      url: `${baseUrl}/projects/${p.slug}`,
-      lastModified: p.updatedAt,
-      changeFrequency: "weekly" as const,
+    ...PROJECTS.map((p) => ({
+      url: `${SITE.url}/projects/${p.slug}`,
+      changeFrequency: "monthly" as const,
       priority: 0.7,
     })),
   ];

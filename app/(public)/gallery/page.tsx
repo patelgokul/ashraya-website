@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Photos and videos from CBAF programs, events, and community work across India.",
+  description: "Photos from Ashraya programs, events, and community work across India.",
 };
 
-// const categories = ["All", "Women Empowerment", "Education", "Environment", "Emergency Relief", "Events"];
-
-const categories = ["All", "Education", "Environment", "Women Empowerment", "Child Welfare"];
+const categories = ["All", "Education", "Environment", "Skills & Livelihood", "Community"];
 
 // const placeholderImages = [
 //   // { label: "Women's Training Batch 5",  category: "Women Empowerment", emoji: "👩‍💼" },
@@ -25,25 +23,10 @@ const categories = ["All", "Education", "Environment", "Women Empowerment", "Chi
 // ];
 
 const placeholderImages = [
-  // Shanti Vidya Setu
-  // { label: "Shanti Vidya Setu — Digital Literacy",  category: "Education",          emoji: "💻", image: "/projects/shanti-vidya-setu.jpg" },
-  { label: "Shanti Vidya Setu — Learning Center",   category: "Education",          emoji: "📚", image: "/projects/shanti-vidya-setu.jpg" },
-  // { label: "Shanti Vidya Setu — Youth Training",    category: "Education",          emoji: "🎓", image: "/projects/shanti-vidya-setu.jpg" },
-
-  // Hariyali
-  { label: "Hariyali — Tree Plantation Drive",      category: "Environment",        emoji: "🌳", image: "/projects/hariyali.jpg" },
-  // { label: "Hariyali — Clean Community Drive",      category: "Environment",        emoji: "🌱", image: "/projects/hariyali.jpg" },
-  // { label: "Hariyali — Green Community",            category: "Environment",        emoji: "♻️", image: "/projects/hariyali.jpg" },
-
-  // Skill Shakti
-  // { label: "Skill Shakti — Vocational Training",   category: "Women Empowerment",  emoji: "👩‍💼", image: "/projects/skill-shakti.jpg" },
-  // { label: "Skill Shakti — Job Placement",         category: "Women Empowerment",  emoji: "⭐", image: "/projects/skill-shakti.jpg" },
-  { label: "Skill Shakti — Skill Center",          category: "Women Empowerment",  emoji: "🏆", image: "/projects/skill-shakti.jpg" },
-
-  // Pragati Path
-  { label: "Pragati Path — Children Learning",     category: "Child Welfare",      emoji: "📖", image: "/projects/pragati-path.jpg" },
-  // { label: "Pragati Path — Nutritious Meals",      category: "Child Welfare",      emoji: "🍱", image: "/projects/pragati-path.jpg" },
-  // { label: "Pragati Path — Academic Support",      category: "Child Welfare",      emoji: "✏️", image: "/projects/pragati-path.jpg" },
+  { label: "Ashraya Shiksha Sarthi — Learning Centre", category: "Education",           emoji: "📚", image: "/projects/shanti-vidya-setu.jpg" },
+  { label: "Ashraya Paryavaran Sewa — Plantation",     category: "Environment",         emoji: "🌳", image: "/projects/hariyali.jpg" },
+  { label: "Ashraya Udyam — Skill Centre",             category: "Skills & Livelihood", emoji: "🧵", image: "/projects/skill-shakti.jpg" },
+  { label: "Ashraya — Community Outreach",             category: "Community",           emoji: "🤝", image: "/projects/pragati-path.jpg" },
 ];
 
 const COLORS = [

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { XCircle, RefreshCw, Phone } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 export default function PaymentFailedPage() {
   return (
@@ -18,8 +19,8 @@ export default function PaymentFailedPage() {
             <Link href="/donate" className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl text-sm">
               <RefreshCw className="w-4 h-4" /> Try Again
             </Link>
-            <a href="tel:+918529716474" className="flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 font-medium py-3 text-sm">
-              <Phone className="w-4 h-4" /> Call +91 85297 16474
+            <a href={SITE.contact.phoneHref} className="flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 font-medium py-3 text-sm">
+              <Phone className="w-4 h-4" /> Call {SITE.contact.phoneDisplay}
             </a>
           </div>
         </div>

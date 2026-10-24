@@ -1,16 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { IMPACT_STATS } from "@/lib/content";
 
-const stats = [
-  { icon: "👥", target: 6200, label: "Lives Impacted", format: (v: number) => `${Math.round(v).toLocaleString("en-IN")}+` },
-  { icon: "🌳", target: 6000, label: "Trees Planted", format: (v: number) => `${Math.round(v).toLocaleString("en-IN")}+` },
-  { icon: "👩", target: 700, label: "Women Empowered", format: (v: number) => `${Math.round(v).toLocaleString("en-IN")}+` },
-  { icon: "📚", target: 1100, label: "Students Educated", format: (v: number) => `${Math.round(v).toLocaleString("en-IN")}+` },
-  { icon: "🤝", target: 400, label: "Active Volunteers", format: (v: number) => `${Math.round(v)}+` },
-  // { icon: "🗺️", target: 6, label: "Presence", format: (v: number) => `${Math.round(v)}` },
-  { icon: "🗺️", target: 0, label: "Presence", format: () => `Pan India` },
-];
+const stats = IMPACT_STATS.map((s) => ({
+  icon:   s.icon,
+  label:  s.label,
+  target: Number(s.value.replace(/\D/g, "")),
+  format: (v: number) => {
+    const formatted = Math.round(v).toLocaleString("en-IN");
+    return s.value.trim().endsWith("+") ? `${formatted}+` : formatted;
+  },
+}));
 
 function Counter({ target, format }: { target: number; format: (v: number) => string }) {
   const [value, setValue] = useState(0);
@@ -58,12 +59,11 @@ export function ImpactStats() {
             Numbers That Matter
           </h2>
           <p className="text-gray-400 max-w-xl mx-auto">
-            Every rupee raised translates directly into change on the ground.
+            27 locations across 18 cities and 13 states and union territories.
           </p>
         </div>
 
-<div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-4"> */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}

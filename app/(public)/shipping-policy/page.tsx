@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Shipping & Delivery Policy" };
 
@@ -6,19 +7,15 @@ export default function ShippingPolicyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
       <h1 className="font-display text-4xl font-bold text-gray-900 mb-2">Shipping & Delivery Policy</h1>
-      <p className="text-gray-400 text-sm mb-8">Last updated: January 2025</p>
+      <p className="text-gray-400 text-sm mb-8">Last updated: October 2026</p>
       <div className="prose prose-gray max-w-none space-y-6 text-gray-600">
         <section>
           <h2 className="font-display text-xl font-bold text-gray-900">Digital Delivery</h2>
-          <p>Community Base Advancement Foundation primarily provides digital services including donation receipts, 80G certificates, impact reports, and newsletter updates. These are delivered electronically to your registered email address.</p>
+          <p>{SITE.name} primarily provides digital services including donation acknowledgements, impact updates, and newsletters. These are delivered electronically to your registered email address.</p>
         </section>
         <section>
-          <h2 className="font-display text-xl font-bold text-gray-900">Donation Receipts</h2>
-          <p>An automated donation receipt is sent to your email address within 24 hours of a successful transaction. If you do not receive it, please check your spam folder or contact us.</p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-bold text-gray-900">80G Certificates</h2>
-          <p>Annual 80G certificates for tax exemption purposes are issued within 30 days of the end of the financial year for all eligible donations.</p>
+          <h2 className="font-display text-xl font-bold text-gray-900">Donation Acknowledgements</h2>
+          <p>An acknowledgement is sent to your email address after we confirm your donation. If you do not receive it, please check your spam folder or contact us.</p>
         </section>
         <section>
           <h2 className="font-display text-xl font-bold text-gray-900">Physical Merchandise</h2>
@@ -26,7 +23,7 @@ export default function ShippingPolicyPage() {
         </section>
         <section>
           <h2 className="font-display text-xl font-bold text-gray-900">Contact</h2>
-          <p>For delivery queries: info@communityfoundation.in | +91 85297 16474</p>
+          <p>For delivery queries: {SITE.contact.email} | {SITE.contact.phoneDisplay}</p>
         </section>
       </div>
     </div>

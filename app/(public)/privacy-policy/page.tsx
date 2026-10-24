@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
 
@@ -34,7 +35,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Account:</strong> a unique account created for You to access our Service or parts of our Service.</li>
             <li><strong>Affiliate:</strong> an entity that controls, is controlled by, or is under common control with a party.</li>
-            <li><strong>Company:</strong> refers to Plot No. 33-A, G/F, Parking Kh No-29/19, Shyam Vihar Kakrola, Delhi-110078.</li>
+            <li><strong>Company:</strong> refers to {SITE.name}, {SITE.contact.address}.</li>
             <li><strong>Cookies:</strong> small files placed on Your device to store browsing history and other data.</li>
             <li><strong>Country:</strong> India.</li>
             <li><strong>Device:</strong> any device that can access the Service such as a computer, cell phone, or tablet.</li>
@@ -42,7 +43,7 @@ export default function PrivacyPolicyPage() {
             <li><strong>Service:</strong> refers to the Website.</li>
             <li><strong>Service Provider:</strong> any person or company processing data on behalf of the Company.</li>
             <li><strong>Usage Data:</strong> data collected automatically from the Service.</li>
-            <li><strong>Website:</strong> COMMUNITY BASE ADVANCEMENT FOUNDATION, accessible from <a href="https://communityfoundation.in" className="text-blue-600 hover:underline">https://communityfoundation.in</a>.</li>
+            <li><strong>Website:</strong> {SITE.name}, accessible from <a href={SITE.url} className="text-blue-600 hover:underline">{SITE.url}</a>.</li>
             <li><strong>You:</strong> the individual accessing or using the Service or the legal entity they represent.</li>
           </ul>
         </section>
@@ -190,9 +191,9 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="font-display text-xl font-bold text-gray-900">14. Contact Us</h2>
           <p>
-            Email: <a href="mailto:info@communityfoundation.in" className="text-blue-600 hover:underline">info@communityfoundation.in</a>
+            Email: <a href={`mailto:${SITE.contact.email}`} className="text-blue-600 hover:underline">{SITE.contact.email}</a>
             <br />
-            Phone: <a href="tel:+918529716474" className="text-blue-600 hover:underline">+91-8529716474</a>
+            Phone: <a href={SITE.contact.phoneHref} className="text-blue-600 hover:underline">{SITE.contact.phoneDisplay}</a>
           </p>
         </section>
 

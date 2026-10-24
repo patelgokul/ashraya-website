@@ -1,75 +1,55 @@
 "use client";
+import Link from "next/link";
 import { motion } from "framer-motion";
-
-const pillars = [
-  {
-    icon: "🏗️",
-    title: "Building Capacity",
-    description: "We empower people — especially women and youths — with the skills and networks they need to lead, grow, and build their communities.",
-    color: "from-blue-50 to-blue-100",
-    border: "border-blue-100",
-    badge: "bg-blue-100 text-blue-700",
-  },
-  {
-    icon: "🚪",
-    title: "Advancing Opportunity",
-    description: "We open doors to better education for children, livelihoods for women, and local partnerships that create a brighter future.",
-    color: "from-blue-50 to-blue-100",
-    border: "border-blue-100",
-    badge: "bg-blue-100 text-blue-700",
-  },
-  {
-    icon: "🛡️",
-    title: "Supporting Well-Being",
-    description: "We provide a safety net with services like emergency aid, plantation drives, and community support for the most vulnerable.",
-    color: "from-amber-50 to-amber-100",
-    border: "border-amber-100",
-    badge: "bg-amber-100 text-amber-700",
-  },
-  {
-    icon: "⭐",
-    title: "Empowering Leaders",
-    description: "We encourage individuals to take the lead on projects and initiatives that champion their own community development.",
-    color: "from-purple-50 to-purple-100",
-    border: "border-purple-100",
-    badge: "bg-purple-100 text-purple-700",
-  },
-];
+import { ArrowRight } from "lucide-react";
+import { VERTICALS } from "@/lib/content";
 
 export function CorePillars() {
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md mb-4">
-            Our Approach
+          <span className="inline-block bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md mb-4">
+            Main Verticals
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-            Four Core Pillars
+            ✨ A S H R A Y A ✨
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Every program we run is rooted in one of these foundational commitments to lasting community impact.
+            Ashraya runs its initiatives on its own name — every letter is a mission we live by.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {pillars.map((pillar, i) => (
+          {VERTICALS.map((v, i) => (
             <motion.div
-              key={pillar.title}
+              key={v.slug}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
               viewport={{ once: true }}
               whileHover={{ y: -4 }}
-              className={`bg-gradient-to-br ${pillar.color} rounded-2xl p-6 border ${pillar.border} cursor-default`}
             >
-              <div className={`inline-flex items-center justify-center w-12 h-12 ${pillar.badge} rounded-xl text-2xl mb-4`}>
-                {pillar.icon}
-              </div>
-              <h3 className="font-display text-lg font-bold text-gray-900 mb-3">{pillar.title}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{pillar.description}</p>
+              <Link
+                href={`/verticals#${v.slug}`}
+                className="group block h-full bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-display text-4xl font-black text-blue-700">{v.letter}</span>
+                  <span className="text-3xl">{v.icon}</span>
+                </div>
+                <h3 className="font-display text-lg font-bold text-gray-900 mb-2">{v.name}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{v.tagline}</p>
+              </Link>
             </motion.div>
           ))}
+          <Link
+            href="/verticals"
+            className="flex flex-col items-center justify-center gap-2 rounded-2xl p-6 bg-gradient-to-br from-blue-700 to-blue-900 text-white hover:from-blue-800 transition-colors"
+          >
+            <span className="font-display text-lg font-bold">Explore all verticals</span>
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </section>

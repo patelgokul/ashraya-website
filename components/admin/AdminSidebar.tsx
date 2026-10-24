@@ -25,11 +25,11 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="p-5 border-b border-gray-800">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold font-display text-sm">C</span>
+          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold font-display text-sm">A</span>
           </div>
           <div>
-            <div className="text-white font-semibold text-xs leading-tight">CBAF Admin</div>
+            <div className="text-white font-semibold text-xs leading-tight">Ashraya Admin</div>
             <div className="text-gray-500 text-xs">Dashboard</div>
           </div>
         </div>

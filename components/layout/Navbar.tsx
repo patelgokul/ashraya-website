@@ -5,22 +5,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Heart, ChevronDown } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 const navLinks = [
   { label: "About", href: "/about" },
+  { label: "Team", href: "/team" },
   {
-    label: "Programs",
-    href: "#",
+    label: "Our Work",
+    href: "/verticals",
     children: [
+      { label: "ASHRAYA Verticals", href: "/verticals" },
       { label: "Projects", href: "/projects" },
-      // { label: "Campaigns", href: "/campaigns" },
-      // { label: "Fund Predictor", href: "/fund-predictor" },
     ],
   },
   { label: "Impact", href: "/impact" },
+  { label: "Vision & Mission", href: "/vision-mission" },
   { label: "Volunteer", href: "/volunteer" },
-  // { label: "News", href: "/news" },
-  { label: "Vision & Mission",   href: "/vision-mission" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -44,38 +44,16 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          {/* <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/" className="flex items-center flex-shrink-0">
             <Image
-    src="/icons/logo.png"
-    alt="CBAF Logo"
-    width={40}
-    height={40}
-    className="rounded-lg object-contain"
-    />
-            <div className="hidden sm:block">
-              <div className="font-display font-bold text-gray-900 text-sm leading-tight">
-                Community Base Advancement
-              </div>
-              <div className="text-xs text-gray-400 tracking-wide">Foundation</div>
-            </div>
-          </Link> */}
-
-         <Link href="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
-  <Image
-    src="/icons/logo.png"
-    alt="CBAF Logo"
-    width={40}
-    height={40}
-    className="rounded-lg object-contain flex-shrink-0"
-  />
-  <div className="block min-w-0">
-    <div className="font-display font-bold text-gray-900 text-xs sm:text-sm leading-tight truncate">
-      Community Base Advancement
-    </div>
-    <div className="text-[10px] sm:text-xs text-gray-400 tracking-wide">Foundation</div>
-  </div>
-</Link>
+              src={SITE.logo}
+              alt={`${SITE.name} logo`}
+              width={96}
+              height={52}
+              priority
+              className="h-11 w-auto object-contain"
+            />
+          </Link>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
@@ -133,7 +111,7 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-2">
             <Link
               href="/donate"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
             >
               <Heart className="w-3.5 h-3.5" />
               Donate Now
@@ -186,7 +164,7 @@ export function Navbar() {
               <div className="pt-2">
                 <Link
                   href="/donate"
-                  className="flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-2.5 rounded-full text-sm w-full"
+                  className="flex items-center justify-center gap-2 bg-orange-500 text-white font-semibold py-2.5 rounded-full text-sm w-full"
                   onClick={() => setMobileOpen(false)}
                 >
                   <Heart className="w-4 h-4" /> Donate Now

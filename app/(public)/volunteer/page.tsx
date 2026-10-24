@@ -6,11 +6,19 @@ import { VolunteerSchema } from "@/lib/validations/volunteer";
 import { useState } from "react";
 import { CheckCircle, Users, Heart, Globe } from "lucide-react";
 import type { z } from "zod";
+import { VERTICALS } from "@/lib/content";
 
 type FormData = z.infer<typeof VolunteerSchema>;
 
 const SKILLS = ["Teaching/Training", "Medical/Healthcare", "Legal Aid", "Engineering/Technical", "Photography/Videography", "Social Media/Content", "Event Management", "Counselling", "Translation/Language", "Fundraising", "Driving/Logistics", "Other"];
-const INTERESTS = ["Education", "Women Empowerment", "Healthcare", "Environment", "Emergency Relief", "Child Welfare", "Livelihood", "Youth Development"];
+const INTERESTS = VERTICALS.map((v) => v.name);
+
+const GIVE_OUT = [
+  { amount: "1 hour", per: "a Day" },
+  { amount: "1 day",  per: "a Week" },
+  { amount: "1 day",  per: "a Month" },
+  { amount: "1 day",  per: "a Year" },
+];
 
 export default function VolunteerPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -32,9 +40,9 @@ export default function VolunteerPage() {
   }
 
   const stats = [
-    { icon: Users, value: "400+", label: "Active Volunteers" },
-    { icon: Heart, value: "6.2K+", label: "Lives Impacted" },
-    { icon: Globe, value: "Pan India", label: "Presence" },
+    { icon: Users, value: "500+", label: "Volunteers" },
+    { icon: Heart, value: "5,000+", label: "Children Benefited" },
+    { icon: Globe, value: "13", label: "States & UTs" },
   ];
 
   return (
@@ -49,7 +57,7 @@ export default function VolunteerPage() {
             Join Our Volunteer Family
           </h1>
           <p className="text-gray-300 text-lg leading-relaxed">
-            Your skills, time, and passion can transform lives. Join 400+ volunteers making real change across India.
+            Your skills, time, and passion can transform lives. Join 500+ volunteers creating impact across India.
           </p>
           <div className="grid grid-cols-3 gap-4 mt-8 max-w-sm mx-auto">
             {stats.map(({ icon: Icon, value, label }) => (
@@ -62,6 +70,28 @@ export default function VolunteerPage() {
           </div>
         </div>
       </div>
+
+      <section className="bg-white border-b border-gray-100 py-12 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-display text-2xl font-bold text-gray-900 mb-6">Give Out</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+            {GIVE_OUT.map((g) => (
+              <div key={g.per} className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
+                <div className="font-display text-xl font-bold text-orange-600">{g.amount}</div>
+                <div className="text-sm text-gray-600">{g.per}</div>
+              </div>
+            ))}
+          </div>
+          <p className="font-display text-lg text-blue-900 leading-relaxed">
+            एतावज्जन्मसाफल्यं देहिनामिह देहिषु ।<br />
+            प्राणैरर्थैर्धिया वाचा श्रेयआचरणं सदा ॥
+          </p>
+          <p className="text-sm text-gray-500 mt-3 max-w-xl mx-auto">
+            It is the duty of every living being to perform welfare activities for the benefit of others
+            with their life, wealth, intelligence, and words.
+          </p>
+        </div>
+      </section>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         {submitted ? (

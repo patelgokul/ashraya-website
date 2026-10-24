@@ -1,47 +1,31 @@
 import type { Metadata } from "next";
-import { DonationWidget } from "@/components/donation/DonationWidget";
-import { Heart, Shield, Award, Zap } from "lucide-react";
+import Link from "next/link";
+import { Heart, Landmark, Mail, Phone } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title:       "Donate",
-  description: "Make a donation to Community Base Advancement Foundation.",
+  description: `Support ${SITE.name} through a direct bank transfer.`,
 };
 
-// async function getActiveCampaigns() {
-//   try {
-//     const { prisma } = await import("@/lib/prisma");
-//     return await prisma.campaign.findMany({
-//       where:   { status: "ACTIVE" },
-//       select:  { id: true, title: true, category: true, raisedAmount: true, goalAmount: true },
-//       orderBy: [{ isUrgent: "desc" }, { isFeatured: "desc" }],
-//       take:    10,
-//     });
-//   } catch {
-//     return [];
-//   }
-// }
+const IMPACT = [
+  { icon: "🍲", text: "Free meals at our community kitchens" },
+  { icon: "📚", text: "Scholarships, books, and stationery for children" },
+  { icon: "🐄", text: "Fodder for cows at goshalas in need" },
+  { icon: "🧵", text: "Stitching and livelihood training for women" },
+  { icon: "🏥", text: "Health camps and yoga sessions" },
+  { icon: "👵", text: "Care for the elderly through Aashirvad Seva" },
+];
 
-async function getProjects() {
-  try {
-    const { prisma } = await import("@/lib/prisma");
-    return await prisma.project.findMany({
-      select: { id: true, title: true, category: true, beneficiaries: true },
-      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
-    });
-  } catch {
-    return [];
-  }
-}
-
-// Fallback campaign id for demo when DB not connected
-const DEMO_CAMPAIGN_ID = "demo-campaign-id";
-
-export default async function DonatePage() {
-  // const activeCampaigns = await getActiveCampaigns();
-  // const generalCampaign = activeCampaigns[0] || null;
-
-  const projects = await getProjects();
-const generalProject = projects[0];
+export default function DonatePage() {
+  const { bank, contact } = SITE;
+  const bankRows = [
+    { label: "Account Name",   value: bank.accountName },
+    { label: "Account Number", value: bank.accountNo },
+    { label: "IFSC Code",      value: bank.ifsc },
+    { label: "Bank",           value: bank.bankName },
+    { label: "Branch",         value: bank.branch },
+  ];
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -51,117 +35,71 @@ const generalProject = projects[0];
             <Heart className="w-7 h-7 text-white" />
           </div>
           <h1 className="font-display text-4xl font-bold text-white mb-3">Make a Donation</h1>
-          <p className="text-green-100 text-lg">
-            Your generosity fuels real change. Every rupee goes directly to communities that need it most.
+          <p className="text-blue-100 text-lg">
+            Your generosity fuels real change. Every rupee reaches the communities that need it most.
           </p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            {/* {activeCampaigns.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-                <h2 className="font-display text-lg font-bold text-gray-900 mb-4">Choose a Campaign</h2>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {activeCampaigns.map((c) => {
-                    const pct = Math.round((c.raisedAmount / c.goalAmount) * 100);
-                    return (
-                      <label
-                        key={c.id}
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer border border-transparent hover:border-gray-200 transition-all"
-                      >
-                        <input
-                          type="radio"
-                          name="campaign"
-                          value={c.id}
-                          defaultChecked={c.id === generalCampaign?.id}
-                          className="accent-blue-600"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-800 text-sm truncate">{c.title}</div>
-                          <div className="text-xs text-gray-400 mt-0.5">
-                            {c.category.replace("_", " ")} · {pct}% funded
-                          </div>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+              <h2 className="font-display text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                <Landmark className="w-5 h-5 text-blue-600" /> Donate by Bank Transfer
+              </h2>
+              <p className="text-sm text-gray-500 mb-6">Use NEFT, RTGS, IMPS, or your banking app to transfer to:</p>
+              <dl className="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden">
+                {bankRows.map((row) => (
+                  <div key={row.label} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-4 py-3 bg-white">
+                    <dt className="text-sm text-gray-500">{row.label}</dt>
+                    <dd className="font-semibold text-gray-900 font-mono tracking-wide select-all">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="mt-6 bg-orange-50 border border-orange-100 rounded-xl p-4 text-sm text-orange-900">
+                After your transfer, please share your name, amount, and transaction ID at{" "}
+                <a href={`mailto:${contact.email}`} className="font-semibold underline">{contact.email}</a>{" "}
+                so we can thank you and keep you updated.
               </div>
-            )} */}
-
-
-            {projects.length > 0 && (
-  <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-    <h2 className="font-display text-lg font-bold text-gray-900 mb-4">Choose a Project</h2>
-    <div className="space-y-2 max-h-60 overflow-y-auto">
-      {projects.map((p, i) => (
-        <label key={p.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer border border-transparent hover:border-gray-200 transition-all">
-          <input type="radio" name="project" value={p.id} defaultChecked={i === 0} className="accent-blue-600" />
-          <div className="flex-1 min-w-0">
-            <div className="font-medium text-gray-800 text-sm truncate">{p.title}</div>
-            <div className="text-xs text-gray-400 mt-0.5">
-              {p.category}
-              {p.beneficiaries && ` · ${p.beneficiaries.toLocaleString("en-IN")} beneficiaries`}
             </div>
-          </div>
-        </label>
-      ))}
-    </div>
-  </div>
-)}
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-display text-lg font-bold text-gray-900 mb-5">Donation Details</h2>
-              {/* <DonationWidget
-                campaignId={generalCampaign?.id || DEMO_CAMPAIGN_ID}
-                campaignTitle={generalCampaign?.title || "Community Base Advancement Foundation"}
-              /> */}
-                <DonationWidget campaignId={generalProject.id} campaignTitle={generalProject.title} />
-
+              <h2 className="font-display text-lg font-bold text-gray-900 mb-2">Online payments coming soon</h2>
+              <p className="text-sm text-gray-500">
+                UPI and card payments will be available here shortly. Until then, bank transfer is the
+                fastest way to support us. For any help, reach us below.
+              </p>
+              <div className="flex flex-wrap gap-3 mt-4">
+                <a href={contact.phoneHref} className="inline-flex items-center gap-2 border border-gray-200 hover:border-blue-400 rounded-xl px-4 py-2 text-sm text-gray-700">
+                  <Phone className="w-4 h-4 text-blue-600" /> {contact.phoneDisplay}
+                </a>
+                <a href={`mailto:${contact.email}`} className="inline-flex items-center gap-2 border border-gray-200 hover:border-blue-400 rounded-xl px-4 py-2 text-sm text-gray-700">
+                  <Mail className="w-4 h-4 text-blue-600" /> {contact.email}
+                </a>
+              </div>
             </div>
           </div>
 
           <div className="space-y-5">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <h3 className="font-display font-bold text-gray-900 mb-4">Your Impact</h3>
+              <h3 className="font-display font-bold text-gray-900 mb-4">Your Donation Supports</h3>
               <div className="space-y-3">
-                {[
-                  { amount: 500,   impact: "📚 Educational kit for 1 child" },
-                  { amount: 1000,  impact: "🍱 Meals for 10 children (1 month)" },
-                  { amount: 2500,  impact: "🧵 Skill development for 1 woman" },
-                  { amount: 5000,  impact: "🏘️ Community development fund" },
-                  { amount: 10000, impact: "⭐ Sponsor a full program" },
-                ].map((item) => (
-                  <div
-                    key={item.amount}
-                    className="flex gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100"
-                  >
-                    <span className="text-blue-700 font-bold text-sm whitespace-nowrap">
-                      ₹{item.amount.toLocaleString("en-IN")}
-                    </span>
-                    <span className="text-blue-800 text-sm">{item.impact}</span>
+                {IMPACT.map((item) => (
+                  <div key={item.text} className="flex gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <span>{item.icon}</span>
+                    <span className="text-blue-900 text-sm">{item.text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <h3 className="font-display font-bold text-gray-900 mb-4">Why Donate with Us</h3>
-              <div className="space-y-3">
-                {[
-                  { icon: Shield, text: "100% secure payments via Razorpay",  color: "text-blue-600" },
-                  { icon: Award,  text: "80G tax exemption certificate",        color: "text-blue-600"  },
-                  { icon: Zap,    text: "Direct impact — no middlemen",         color: "text-amber-600" },
-                  { icon: Heart,  text: "Instant receipt sent to your email",   color: "text-red-500"   },
-                ].map(({ icon: Icon, text, color }) => (
-                  <div key={text} className="flex items-start gap-3">
-                    <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${color}`} />
-                    <span className="text-sm text-gray-600">{text}</span>
-                  </div>
-                ))}
-              </div>
+              <h3 className="font-display font-bold text-gray-900 mb-2">Prefer to give time?</h3>
+              <p className="text-sm text-gray-500 mb-4">One hour a day, one day a week, a month, or a year — every bit counts.</p>
+              <Link href="/volunteer" className="block text-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 rounded-xl text-sm">
+                Become a Volunteer
+              </Link>
             </div>
           </div>
         </div>

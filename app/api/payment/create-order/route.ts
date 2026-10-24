@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const order = await razorpay.orders.create({
       amount:   Math.round(amount * 100),
       currency: "INR",
-      receipt:  `cbaf_${Date.now()}`,
+      receipt:  `ashraya_${Date.now()}`,
       notes:    { campaignId, donorName, donorEmail },
     });
 

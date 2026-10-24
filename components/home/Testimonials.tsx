@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const testimonials = [
   {
-    text: "The skill development program completely transformed my life. I now run my own tailoring business and support my family independently. CBAF gave me wings.",
+    text: "The skill development program completely transformed my life. I now run my own tailoring business and support my family independently. Ashraya gave me wings.",
     name: "Priya Raghunathan",
     role: "Beneficiary, Women's Skill Program",
     initials: "PR",
@@ -19,7 +19,7 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: "Volunteering with CBAF has been the most meaningful experience of my career. The team is passionate and the communities welcome us with open arms.",
+    text: "Volunteering with Ashraya has been the most meaningful experience of my career. The team is passionate and the communities welcome us with open arms.",
     name: "Sneha Mehta",
     role: "Volunteer, Education Program",
     initials: "SM",
@@ -35,7 +35,7 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: "CBAF planted 200 trees in our village as part of the Green Drive. Our water table improved within a year. This is what real environmental work looks like.",
+    text: "Ashraya planted 200 trees in our village as part of the Green Drive. Our water table improved within a year. This is what real environmental work looks like.",
     name: "Lalitha Devi",
     role: "Community Member, Jharkhand",
     initials: "LD",
@@ -43,7 +43,7 @@ const testimonials = [
     stars: 5,
   },
   {
-    text: "The emergency relief during last year\'s floods was lightning-fast. Food kits, medicines, tarpaulins — they were there in 48 hours. CBAF saved us.",
+    text: "The emergency relief during last year\'s floods was lightning-fast. Food kits, medicines, tarpaulins — they were there in 48 hours. Ashraya saved us.",
     name: "Mohammed Rafiq",
     role: "Flood Relief Beneficiary, Assam",
     initials: "MR",

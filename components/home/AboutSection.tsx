@@ -1,21 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Award, Users, Globe } from "lucide-react";
-
-// const stats = [
-//   { value: "48", label: "Active Projects" },
-//   { value: "18", label: "States Covered" },
-//   { value: "12K+", label: "Lives Impacted" },
-//   { value: "9+", label: "Years of Service" },
-// ];
+import { ArrowRight, HeartHandshake, Globe } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 export function AboutSection() {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Visual */}
           <motion.div
             initial={{ opacity: 0, x: -32 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -23,73 +16,53 @@ export function AboutSection() {
             viewport={{ once: true }}
             className="relative"
           >
-            {/* <div className="relative rounded-2xl overflow-hidden h-80 bg-gradient-to-br from-blue-50 to-blue-100">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.15),transparent_60%),radial-gradient(circle_at_70%_50%,rgba(59,130,246,0.1),transparent_60%)]" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-7xl mb-4">🌱</div>
-                  <div className="font-display text-2xl font-bold text-blue-700">Est. 2015</div>
-                  <div className="text-sm text-gray-500 mt-1">Serving Communities</div>
-                </div>
-              </div> */}
-
             <div className="relative rounded-2xl overflow-hidden h-80">
-  <img
-    src="/images/about-ngo.jpg"
-    alt="Community Base Advancement Foundation"
-    className="w-full h-full object-cover"
-  />
-  {/* Dark overlay */}
-  <div className="absolute inset-0 bg-slate-900/20" />
+              <img
+                src="/images/about-ngo.jpg"
+                alt={`${SITE.name} community work`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-slate-900/20" />
 
-              {/* Floating cards */}
               <div className="absolute top-4 right-4 bg-white rounded-xl p-3 shadow-lg">
                 <div className="flex items-center gap-2">
-                  <Award className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-semibold text-gray-700">80G Certified</span>
+                  <HeartHandshake className="w-4 h-4 text-orange-500" />
+                  <span className="text-xs font-semibold text-gray-700">500+ Volunteers</span>
                 </div>
               </div>
               <div className="absolute bottom-4 left-4 bg-white rounded-xl p-3 shadow-lg">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-semibold text-gray-700">Pan-India NGO</span>
+                  <span className="text-xs font-semibold text-gray-700">13 States & UTs</span>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, x: 32 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md mb-4">
-              About Us
+            <span className="inline-block bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md mb-4">
+              Who We Are
             </span>
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              Built on Belief,<br />
-              <span className="text-blue-600">Driven by Purpose</span>
+              Every Individual<br />
+              <span className="text-blue-700">Should Care for Society</span>
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              The Community Base Advancement Foundation was created from a simple yet powerful belief:
-              that truly strong communities are built when people are equipped, connected, and supported.
+              Our vision is for all of us to realise that each individual should care for society.
+              Our work and events are open to everyone who is passionate about creating a better,
+              more empathetic society.
             </p>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              We take a holistic approach — we don't focus on a single issue. Instead, we listen to
-              what communities need most and respond with flexible, scalable programs that make a real difference.
+            <p className="text-gray-600 leading-relaxed mb-4">
+              We strive for a joyous and healthy world, where people live in harmony and future
+              generations inherit an ideal environment — a world that knows no suffering, where
+              knowledge reaches every level of society.
             </p>
-
-            {/* Stats grid */}
-            {/* <div className="grid grid-cols-2 gap-4 mb-8">
-              {stats.map((stat) => (
-                <div key={stat.label} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <div className="font-display text-2xl font-bold text-blue-600">{stat.value}</div>
-                  <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
-                </div>
-              ))}
-            </div> */}
+            <p className="text-blue-800 font-semibold italic mb-6">&ldquo;{SITE.motto}&rdquo;</p>
 
             <Link
               href="/about"

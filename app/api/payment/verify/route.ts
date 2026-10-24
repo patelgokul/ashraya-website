@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       donorName:     donation.donorName,
       donorEmail:    donation.donorEmail,
       amount:        donation.amount,
-      campaignTitle: campaign?.title || "CBAF Campaign",
+      campaignTitle: campaign?.title || "Ashraya Donation",
       paymentId:     razorpay_payment_id,
     }).catch(console.error);
 

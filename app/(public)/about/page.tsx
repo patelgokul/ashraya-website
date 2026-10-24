@@ -1,77 +1,95 @@
 import type { Metadata } from "next";
-import { Award, Users, Globe, Heart } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { SITE } from "@/lib/site";
+import { VERTICALS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn about Community Base Advancement Foundation — our story, team, and mission to build stronger communities across India.",
+  description: `Learn about ${SITE.name} — our story, values, and the seven ASHRAYA verticals.`,
 };
 
+const VALUES = [
+  { icon: "🤲", title: "Selflessness",            desc: "Serving others without expecting anything in return." },
+  { icon: "💛", title: "Compassion",              desc: "Caring for every person, animal, and plant as part of one family." },
+  { icon: "🗣️", title: "Soft Skills",             desc: "Service builds empathy, communication, and teamwork." },
+  { icon: "🌟", title: "Leadership",              desc: "Bringing out the leader within every volunteer and youth." },
+  { icon: "😊", title: "Happiness & Satisfaction", desc: "The deep fulfilment that comes from helping others." },
+  { icon: "🎁", title: "The Joy of Giving",        desc: "Giving time, wealth, intelligence, and words for the good of all." },
+];
 
 export default function AboutPage() {
   return (
     <div>
-      {/* Hero */}
       <div className="bg-gradient-to-br from-slate-900 to-blue-950 py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="inline-block bg-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md mb-4 border border-blue-500/30">
+          <span className="inline-block bg-orange-500/20 text-orange-300 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md mb-4 border border-orange-500/30">
             About Us
           </span>
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-white mb-4">
-            Built on Belief, Driven by Purpose
+            {SITE.tagline}
           </h1>
-          <p className="text-gray-300 text-lg leading-relaxed">
-            Since 2022, we have been working at the intersection of community development,
-            education, and empowerment to create lasting change in India.
-          </p>
+          <p className="text-gray-300 text-lg leading-relaxed">&ldquo;{SITE.motto}&rdquo;</p>
         </div>
       </div>
 
-      {/* Our Story */}
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <h2 className="font-display text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
-          <div className="prose prose-lg text-gray-600 space-y-4">
+          <h2 className="font-display text-3xl font-bold text-gray-900 mb-6">Who We Are</h2>
+          <div className="text-gray-600 text-lg leading-relaxed space-y-4">
             <p>
-              The Community Base Advancement Foundation was created from a simple yet powerful belief:
-              that truly strong communities are built when people are equipped, connected, and supported.
+              {SITE.name} believes that each individual should care for society.
+              Our work and events are open to everyone who is passionate about creating a better,
+              more empathetic society.
             </p>
             <p>
-              Founded in 2022 by a group of development professionals and social entrepreneurs, CBAF
-              started with a single women&apos;s skill development program in Shyam Vihar Kakrola, South West Delhi, Delhi. What began
-              as a small vocational training initiative quickly grew into a comprehensive community
-              development platform as we listened closely to what communities actually needed.
+              We strive toward a joyous and healthy world, where people live in harmony while
+              providing an ideal environment for the generations to come. We believe it is possible
+              to create a world that knows no suffering — one where knowledge reaches every level of society.
             </p>
             <p>
-              We take a holistic approach — we don&apos;t focus on a single issue. Instead, we listen
-              to what communities need most and respond with flexible, scalable programs that make a
-              real difference. From rural education and women&apos;s empowerment to environmental
-              restoration and emergency relief, our work spans the full spectrum of community needs.
-            </p>
-            <p>
-              Today, CBAF operates pan-India, has impacted 6,200+ lives. We remain committed to our founding vision: communities that are
-              self-reliant, equitable, and resilient.
+              Ashraya is present at 27 locations across 18 cities and 13 states and union territories,
+              running centres, libraries, Jan Sewa Kendras, and community kitchens.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Values */}
       <section className="py-16 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <h2 className="font-display text-3xl font-bold text-gray-900 text-center mb-3">What ASHRAYA Stands For</h2>
+          <p className="text-gray-500 text-center mb-10">Every letter of our name is a mission.</p>
+          <div className="space-y-3">
+            {VERTICALS.map((v) => (
+              <Link
+                key={v.slug}
+                href={`/verticals#${v.slug}`}
+                className="flex items-center gap-4 bg-white rounded-2xl p-4 border border-gray-100 hover:border-orange-200 hover:shadow-sm transition-all"
+              >
+                <span className="w-11 h-11 flex-shrink-0 rounded-xl bg-blue-700 text-white font-display text-xl font-black flex items-center justify-center">
+                  {v.letter}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-gray-900">{v.name} <span>{v.icon}</span></div>
+                  <div className="text-sm text-gray-500">{v.tagline}</div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-gray-300" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold text-gray-900">Our Values</h2>
+            <h2 className="font-display text-3xl font-bold text-gray-900">Why Social Service?</h2>
+            <p className="text-gray-500 mt-2">What every volunteer gains by serving society.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              { icon: <Heart className="w-6 h-6 text-red-500" />, title: "Compassion", desc: "We lead with empathy and genuine care for every community we serve." },
-              { icon: <Award className="w-6 h-6 text-amber-500" />, title: "Integrity", desc: "Transparent in our finances, honest in our communication, accountable in our actions." },
-              { icon: <Users className="w-6 h-6 text-blue-500" />, title: "Inclusion", desc: "Every voice matters. We design programs that reach the most marginalized." },
-              { icon: <Globe className="w-6 h-6 text-blue-600" />, title: "Sustainability", desc: "We build programs that communities can own, maintain, and scale on their own." },
-            ].map((v) => (
-              <div key={v.title} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mb-4">
-                  {v.icon}
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {VALUES.map((v) => (
+              <div key={v.title} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                <div className="text-3xl mb-3">{v.icon}</div>
                 <h3 className="font-display font-bold text-gray-900 mb-2">{v.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{v.desc}</p>
               </div>
@@ -79,9 +97,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {/* Team */}
-      
     </div>
   );
 }

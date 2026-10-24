@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Heart, Repeat } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 const PRESET_AMOUNTS = [500, 1000, 2500, 5000, 10000];
 
@@ -94,9 +95,9 @@ const emailValid = donorEmail === "" || EMAIL_REGEX.test(donorEmail);
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: finalAmount * 100,
         currency: "INR",
-        name: "Community Base Advancement Foundation",
+        name: SITE.name,
         description: campaignTitle || "Making a Difference Together",
-        image: "/icons/logo.png",
+        image: SITE.icon,
         order_id: orderId,
         handler: async (response: any) => {
           const verifyRes = await fetch("/api/payment/verify", {
@@ -251,7 +252,7 @@ const emailValid = donorEmail === "" || EMAIL_REGEX.test(donorEmail);
       </button>
 
       <p className="text-xs text-center text-gray-400">
-        🔒 Secured by Razorpay · 80G Tax Exemption Available
+        🔒 Secure online payment
       </p>
     </div>
   );

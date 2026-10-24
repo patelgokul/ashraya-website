@@ -2,48 +2,39 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import SessionWrapper from "@/components/layout/SessionWrapper";
-import Script from "next/script";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://communityfoundation.in"
-  ),
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "Community Base Advancement Foundation — Building Stronger Communities",
-    template: "%s | CBAF",
+    default: `${SITE.name} — ${SITE.tagline}`,
+    template: `%s | ${SITE.name}`,
   },
-  description:
-    "An NGO dedicated to women empowerment, rural education, environmental action, and emergency relief across India.",
-  keywords: ["NGO India", "donate India", "women empowerment", "education NGO", "community development"],
+  description: SITE.description,
+  keywords: ["Ashraya", "NGO India", "Ashraya Connect", "education NGO", "women empowerment", "anna seva"],
   robots: { index: true, follow: true },
+  icons: {
+    icon:  SITE.icon,
+    apple: "/icons/apple-touch-icon.png",
+  },
   openGraph: {
     type:     "website",
     locale:   "en_IN",
-    url:      "https://communityfoundation.in",
-    siteName: "Community Base Advancement Foundation",
-    images: [
-      { url: "/og/home.jpg", width: 1200, height: 630, alt: "CBAF" },
-    ],
+    url:      SITE.url,
+    siteName: SITE.name,
+    images:   [{ url: SITE.logo, alt: SITE.name }],
   },
   twitter: {
     card:        "summary_large_image",
-    title:       "Community Base Advancement Foundation",
-    description: "Equipping, connecting, and supporting communities across India.",
-    images:      ["/og/home.jpg"],
+    title:       `${SITE.name} — ${SITE.tagline}`,
+    description: SITE.description,
+    images:      [SITE.logo],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/icons/logo.png" type="image/png" />
-  <link rel="apple-touch-icon" href="/icons/logo.png" />
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
-      </head>
       <body className="antialiased">
         <SessionWrapper>
           {children}
