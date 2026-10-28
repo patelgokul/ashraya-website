@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ExternalLink, Loader2, Plus } from "lucide-react";
 import { useGameBoard } from "@/hooks/useGameBoard";
+import { useScoreFanfare } from "@/hooks/useScoreFanfare";
 import { RegisterCard } from "./RegisterCard";
 import { Leaderboard } from "./Leaderboard";
 import { AddPointsDialog } from "./AddPointsDialog";
@@ -13,6 +14,7 @@ const eventDeepLink =
 
 export function GameDay() {
   const { board, refresh } = useGameBoard();
+  useScoreFanfare(board);
   const [addOpen, setAddOpen] = useState(false);
 
   if (!board) {
