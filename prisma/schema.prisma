@@ -303,3 +303,27 @@ model FundPrediction {
   modelVersion        String   @default("v1.0-heuristic")
   createdAt           DateTime @default(now())
 }
+
+// ─── GAME DAY ────────────────────────────────────
+
+model GameParticipant {
+  id        String      @id @default(cuid())
+  name      String
+  alias     String?
+  phone     String?
+  tokenHash String      @unique
+  createdAt DateTime    @default(now())
+  scores    GameScore[]
+}
+
+model GameScore {
+  id            String          @id @default(cuid())
+  participantId String
+  game          String
+  points        Int
+  createdAt     DateTime        @default(now())
+  participant   GameParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+  @@index([createdAt])
+}
