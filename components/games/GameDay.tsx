@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ExternalLink, Loader2, Plus, Smartphone } from "lucide-react";
+import { ExternalLink, Loader2, Plus } from "lucide-react";
 import { useGameBoard } from "@/hooks/useGameBoard";
 import { RegisterCard } from "./RegisterCard";
 import { Leaderboard } from "./Leaderboard";
@@ -39,11 +39,17 @@ export function GameDay() {
         <div className="lg:col-span-2">
           <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <span className="rounded-xl bg-blue-600 p-2.5 text-white">
-                <Smartphone className="h-5 w-5" />
+              <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+                <svg viewBox="0 0 23 23" className="h-6 w-6" aria-hidden="true">
+                  <rect x="1" y="1" width="9.5" height="9.5" fill="#f25022" />
+                  <rect x="12.5" y="1" width="9.5" height="9.5" fill="#7fba00" />
+                  <rect x="1" y="12.5" width="9.5" height="9.5" fill="#00a4ef" />
+                  <rect x="12.5" y="12.5" width="9.5" height="9.5" fill="#ffb900" />
+                </svg>
               </span>
               <div>
-                <h3 className="font-semibold text-gray-900">Give through Microsoft</h3>
+                <p className="font-bold text-gray-900">Ashraya Shiksha Sarthi</p>
+                <h3 className="mt-0.5 font-semibold text-gray-900">Give through Microsoft</h3>
                 <p className="mt-1 text-sm text-gray-600">
                   Opens the Benevity giving page. Best on your phone.
                 </p>
