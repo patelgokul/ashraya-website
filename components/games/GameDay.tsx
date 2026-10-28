@@ -12,13 +12,13 @@ const eventDeepLink =
   "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D";
 
 export function GameDay() {
-  const { board, error, refresh } = useGameBoard();
+  const { board, refresh } = useGameBoard();
   const [addOpen, setAddOpen] = useState(false);
 
   if (!board) {
     return (
       <div className="flex justify-center py-20 text-gray-400">
-        {error ? <p className="text-sm text-red-500">{error}</p> : <Loader2 className="w-6 h-6 animate-spin" />}
+        <Loader2 className="w-6 h-6 animate-spin" />
       </div>
     );
   }
@@ -31,10 +31,6 @@ export function GameDay() {
 
   return (
     <div className="pb-24 lg:pb-0">
-      {error && (
-        <p className="mb-4 text-center text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg py-2">{error}</p>
-      )}
-
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
