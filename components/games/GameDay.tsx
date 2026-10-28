@@ -7,7 +7,9 @@ import { Leaderboard } from "./Leaderboard";
 import { AddPointsDialog } from "./AddPointsDialog";
 import { MyScores, RecentActivity } from "./ScorePanels";
 
-const eventDeepLink = process.env.NEXT_PUBLIC_GAME_EVENT_URL?.trim();
+const eventDeepLink =
+  process.env.NEXT_PUBLIC_GAME_EVENT_URL?.trim() ||
+  "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D";
 
 export function GameDay() {
   const { board, error, refresh } = useGameBoard();
@@ -42,18 +44,20 @@ export function GameDay() {
                 <Smartphone className="h-5 w-5" />
               </span>
               <div>
-                <h3 className="font-semibold text-gray-900">Continue in the Event App</h3>
+                <h3 className="font-semibold text-gray-900">Give through Microsoft</h3>
                 <p className="mt-1 text-sm text-gray-600">
-                  Best experienced on your smartphone.
+                  Opens the Benevity giving page. Best on your phone.
                 </p>
               </div>
             </div>
             {eventDeepLink ? (
               <a
                 href={eventDeepLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 sm:w-auto"
               >
-                Open Event App <ExternalLink className="h-4 w-4" />
+                Open Giving Page <ExternalLink className="h-4 w-4" />
               </a>
             ) : (
               <button
