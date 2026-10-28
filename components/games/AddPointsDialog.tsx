@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { X } from "lucide-react";
-import { GameScoreSchema, MAX_POINTS_PER_ENTRY, type GameScoreInput } from "@/lib/validations/game";
+import { GAME_OPTIONS, GameScoreSchema, MAX_POINTS_PER_ENTRY, type GameScoreInput } from "@/lib/validations/game";
 
 const inputClass =
   "w-full border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors";
@@ -12,11 +12,10 @@ const inputClass =
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  games: string[];
   onAdded: () => Promise<void>;
 }
 
-export function AddPointsDialog({ open, onOpenChange, games, onAdded }: Props) {
+export function AddPointsDialog({ open, onOpenChange, onAdded }: Props) {
   const [serverError, setServerError] = useState<string | null>(null);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<GameScoreInput>({
     resolver: zodResolver(GameScoreSchema),
@@ -64,15 +63,15 @@ export function AddPointsDialog({ open, onOpenChange, games, onAdded }: Props) {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Game *</label>
-              <input {...register("game")} list="game-suggestions" placeholder="e.g. Carrom" autoComplete="off" className={inputClass} />
-              <datalist id="game-suggestions">
-                {games.map((game) => <option key={game} value={game} />)}
-              </datalist>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Game</label>
+              <select {...register("game")} defaultValue="" className={`${inputClass} bg-white`}>
+                <option value="" disabled>Select a game</option>
+                {GAME_OPTIONS.map((game) => <option key={game} value={game}>{game}</option>)}
+              </select>
               {errors.game && <p className="text-red-500 text-xs mt-1">{errors.game.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Points *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Points</label>
               <input {...register("points")} type="number" inputMode="numeric" min={1} max={MAX_POINTS_PER_ENTRY} placeholder="e.g. 50" className={inputClass} />
               {errors.points && <p className="text-red-500 text-xs mt-1">{errors.points.message}</p>}
             </div>

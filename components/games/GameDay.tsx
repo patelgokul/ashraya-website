@@ -37,8 +37,7 @@ export function GameDay() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <Leaderboard entries={board.leaderboard} meId={board.me.id} />
-          <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="rounded-xl bg-blue-600 p-2.5 text-white">
                 <Smartphone className="h-5 w-5" />
@@ -69,6 +68,7 @@ export function GameDay() {
               </button>
             )}
           </div>
+          <Leaderboard entries={board.leaderboard} meId={board.me.id} />
         </div>
 
         <div className="space-y-6">
@@ -106,7 +106,7 @@ export function GameDay() {
         </button>
       </div>
 
-      <AddPointsDialog open={addOpen} onOpenChange={setAddOpen} games={board.games} onAdded={refresh} />
+      <AddPointsDialog open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} />
     </div>
   );
 }

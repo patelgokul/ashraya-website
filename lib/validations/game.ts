@@ -21,11 +21,19 @@ export const GameRegisterSchema = z.object({
     .pipe(z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit mobile number").optional()),
 });
 
+export const GAME_OPTIONS = [
+  "Snake Ladder",
+  "Ring it for good",
+  "Ring it for gift",
+  "Memory Flip",
+  "Roar & Score",
+  "Lions Mouth",
+  "Toss the ball",
+  "Crash the cup",
+] as const;
+
 export const GameScoreSchema = z.object({
-  game: z
-    .string()
-    .transform(collapseSpaces)
-    .pipe(z.string().min(2, "Game name must be at least 2 characters").max(40, "Game name must be 40 characters or fewer")),
+  game: z.enum(GAME_OPTIONS, { errorMap: () => ({ message: "Please select a game" }) }),
   points: z.coerce
     .number({ invalid_type_error: "Points must be a number" })
     .int("Points must be a whole number")

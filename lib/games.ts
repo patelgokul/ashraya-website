@@ -31,14 +31,6 @@ export async function getCurrentParticipant() {
   return prisma.gameParticipant.findUnique({ where: { tokenHash: hashToken(token) } });
 }
 
-export async function resolveGameName(game: string) {
-  const existing = await prisma.gameScore.findFirst({
-    where: { game: { equals: game, mode: "insensitive" } },
-    select: { game: true },
-  });
-  return existing?.game ?? game;
-}
-
 function rankEntries(entries: Omit<LeaderboardEntry, "rank">[]): LeaderboardEntry[] {
   const sorted = [...entries].sort(
     (a, b) => b.totalPoints - a.totalPoints || a.name.localeCompare(b.name)

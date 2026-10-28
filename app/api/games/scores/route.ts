@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { GameScoreSchema } from "@/lib/validations/game";
-import { getCurrentParticipant, resolveGameName } from "@/lib/games";
+import { getCurrentParticipant } from "@/lib/games";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const score = await prisma.gameScore.create({
     data: {
       participantId: participant.id,
-      game: await resolveGameName(result.data.game),
+      game: result.data.game,
       points: result.data.points,
     },
     select: { id: true },
