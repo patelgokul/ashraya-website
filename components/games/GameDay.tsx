@@ -1,11 +1,13 @@
 "use client";
 import { useState } from "react";
-import { Loader2, Plus } from "lucide-react";
+import { ExternalLink, Loader2, Plus, Smartphone } from "lucide-react";
 import { useGameBoard } from "@/hooks/useGameBoard";
 import { RegisterCard } from "./RegisterCard";
 import { Leaderboard } from "./Leaderboard";
 import { AddPointsDialog } from "./AddPointsDialog";
 import { MyScores, RecentActivity } from "./ScorePanels";
+
+const eventDeepLink = process.env.NEXT_PUBLIC_GAME_EVENT_URL?.trim();
 
 export function GameDay() {
   const { board, error, refresh } = useGameBoard();
@@ -34,6 +36,35 @@ export function GameDay() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Leaderboard entries={board.leaderboard} meId={board.me.id} />
+          <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="rounded-xl bg-blue-600 p-2.5 text-white">
+                <Smartphone className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="font-semibold text-gray-900">Continue in the Event App</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Best experienced on your smartphone.
+                </p>
+              </div>
+            </div>
+            {eventDeepLink ? (
+              <a
+                href={eventDeepLink}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 sm:w-auto"
+              >
+                Open Event App <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-300 px-5 py-3 text-sm font-bold text-gray-600 sm:w-auto"
+              >
+                Event link coming soon
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">
