@@ -27,12 +27,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const participant = await prisma.gameParticipant.upsert({
-    where: { alias },
-    update: {},
-    create: { alias, name, phone },
-    select: { alias: true, name: true },
-  });
+  // A plain insert: Neon's HTTP connection on Workers can't run upsert's transaction.
+  const participant = await prisma.gameParticipant
+    .create({ data: { alias, name, phone }, select: { alias: true, name: true } })
+    .catch(async (error: unknown) => {
+      // Someone claimed the alias between the lookup and the insert; sign them in instead.
+      if ((error as { code?: string }).code !== "P2002") throw error;
+      return prisma.gameParticipant.findUniqueOrThrow({ where: { alias }, select: { alias: true, name: true } });
+    });
 
   const res = NextResponse.json(participant, { status: 201 });
   setAliasCookie(res, participant.alias);
