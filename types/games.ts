@@ -1,7 +1,6 @@
 export interface LeaderboardEntry {
-  id: string;
+  alias: string;
   name: string;
-  alias: string | null;
   rank: number;
   totalPoints: number;
   entries: number;
@@ -23,9 +22,30 @@ export interface MyScore {
 }
 
 export interface GameMe {
-  id: string;
+  alias: string;
   name: string;
   scores: MyScore[];
+}
+
+export interface GameEventSummary {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  eventDate: string;
+  games: string[];
+  givingUrl: string | null;
+  participantCount: number;
+}
+
+export interface GameEventDetails {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  eventDate: string;
+  games: string[];
+  givingUrl: string | null;
 }
 
 export interface GameBoardResponse {

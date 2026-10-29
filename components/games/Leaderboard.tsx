@@ -9,7 +9,7 @@ const PODIUM_STYLES: Record<number, string> = {
   3: "bg-orange-300 text-orange-950",
 };
 
-export function Leaderboard({ entries, meId }: { entries: LeaderboardEntry[]; meId: string | null }) {
+export function Leaderboard({ entries, meAlias }: { entries: LeaderboardEntry[]; meAlias: string | null }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -25,10 +25,10 @@ export function Leaderboard({ entries, meId }: { entries: LeaderboardEntry[]; me
         <ul className="divide-y divide-gray-50">
           <AnimatePresence initial={false}>
             {entries.map((entry) => {
-              const isMe = entry.id === meId;
+              const isMe = entry.alias === meAlias;
               return (
                 <motion.li
-                  key={entry.id}
+                  key={entry.alias}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -47,7 +47,7 @@ export function Leaderboard({ entries, meId }: { entries: LeaderboardEntry[]; me
                       {entry.name} {isMe && <span className="text-xs font-normal text-blue-600">(you)</span>}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
-                      {entry.alias && <span className="text-orange-600 font-medium">&ldquo;{entry.alias}&rdquo; · </span>}
+                      <span className="text-orange-600 font-medium">&ldquo;{entry.alias}&rdquo; · </span>
                       {entry.entries} {entry.entries === 1 ? "game" : "games"} played
                     </p>
                   </div>

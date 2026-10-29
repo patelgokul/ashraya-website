@@ -5,17 +5,14 @@ import { getCurrentParticipant } from "@/lib/games";
 export const dynamic = "force-dynamic";
 
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
-  const participant = await getCurrentParticipant();
-  if (!participant) {
-    return NextResponse.json({ error: "Please register first" }, { status: 401 });
-  }
-
-  const { count } = await prisma.gameScore.deleteMany({
-    where: { id: params.id, participantId: participant.id },
-  });
-  if (count === 0) {
+  const [score, participant] = await Promise.all([
+    prisma.gameScore.findUnique({ where: { id: params.id }, select: { alias: true } }),
+    getCurrentParticipant(),
+  ]);
+  if (!score || !participant || score.alias !== participant.alias) {
     return NextResponse.json({ error: "Score not found" }, { status: 404 });
   }
 
+  await prisma.gameScore.delete({ where: { id: params.id } });
   return NextResponse.json({ success: true });
 }

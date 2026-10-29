@@ -1,22 +1,17 @@
-import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { GameBoardResponse, LeaderboardEntry } from "@/types/games";
+import type { GameBoardResponse, GameEventSummary, LeaderboardEntry } from "@/types/games";
 
-const COOKIE_NAME = "ashraya_game_token";
+const COOKIE_NAME = "ashraya_game_alias";
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 60;
 
-export function createDeviceToken() {
-  return randomBytes(32).toString("base64url");
+export function normalizeAlias(alias: string) {
+  return alias.trim().toLowerCase();
 }
 
-export function hashToken(token: string) {
-  return createHash("sha256").update(token).digest("hex");
-}
-
-export function setDeviceCookie(res: NextResponse, token: string) {
-  res.cookies.set(COOKIE_NAME, token, {
+export function setAliasCookie(res: NextResponse, alias: string) {
+  res.cookies.set(COOKIE_NAME, alias, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -25,10 +20,14 @@ export function setDeviceCookie(res: NextResponse, token: string) {
   });
 }
 
+export function clearAliasCookie(res: NextResponse) {
+  res.cookies.delete(COOKIE_NAME);
+}
+
 export async function getCurrentParticipant() {
-  const token = cookies().get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return prisma.gameParticipant.findUnique({ where: { tokenHash: hashToken(token) } });
+  const alias = cookies().get(COOKIE_NAME)?.value;
+  if (!alias) return null;
+  return prisma.gameParticipant.findUnique({ where: { alias } });
 }
 
 function rankEntries(entries: Omit<LeaderboardEntry, "rank">[]): LeaderboardEntry[] {
@@ -42,54 +41,91 @@ function rankEntries(entries: Omit<LeaderboardEntry, "rank">[]): LeaderboardEntr
   }, []);
 }
 
-export async function getGameBoard(participantId: string | null): Promise<GameBoardResponse> {
-  const [participants, totals, recent, games, myScores] = await Promise.all([
-    prisma.gameParticipant.findMany({ select: { id: true, name: true, alias: true } }),
-    prisma.gameScore.groupBy({ by: ["participantId"], _sum: { points: true }, _count: true }),
+export async function listGameEvents(): Promise<GameEventSummary[]> {
+  const [events, players] = await Promise.all([
+    prisma.gameEvent.findMany({ orderBy: [{ eventDate: "desc" }, { createdAt: "desc" }] }),
+    prisma.gameScore.groupBy({ by: ["eventId", "alias"] }),
+  ]);
+
+  const playerCounts = players.reduce<Map<string, number>>(
+    (counts, { eventId }) => counts.set(eventId, (counts.get(eventId) ?? 0) + 1),
+    new Map()
+  );
+
+  return events.map((event) => ({
+    id: event.id,
+    title: event.title,
+    company: event.company,
+    location: event.location,
+    eventDate: event.eventDate.toISOString().slice(0, 10),
+    games: event.games,
+    givingUrl: event.givingUrl,
+    participantCount: playerCounts.get(event.id) ?? 0,
+  }));
+}
+
+export async function getGameBoard(
+  eventId: string,
+  me: { alias: string; name: string } | null
+): Promise<GameBoardResponse | null> {
+  const event = await prisma.gameEvent.findUnique({ where: { id: eventId } });
+  if (!event) return null;
+
+  const [totals, recent, myScores] = await Promise.all([
+    prisma.gameScore.groupBy({
+      by: ["alias"],
+      where: { eventId },
+      _sum: { points: true },
+      _count: true,
+    }),
     prisma.gameScore.findMany({
+      where: { eventId },
       orderBy: { createdAt: "desc" },
       take: 15,
       select: { id: true, game: true, points: true, createdAt: true, participant: { select: { name: true } } },
     }),
-    prisma.gameScore.findMany({ distinct: ["game"], select: { game: true }, orderBy: { game: "asc" }, take: 100 }),
-    participantId
+    me
       ? prisma.gameScore.findMany({
-          where: { participantId },
+          where: { eventId, alias: me.alias },
           orderBy: { createdAt: "desc" },
           select: { id: true, game: true, points: true, createdAt: true },
         })
       : Promise.resolve([]),
   ]);
 
-  const totalsById = new Map(totals.map((t) => [t.participantId, t]));
+  const aliases = new Set(totals.map((total) => total.alias));
+  if (me) aliases.add(me.alias);
+  const participants = await prisma.gameParticipant.findMany({
+    where: { alias: { in: Array.from(aliases) } },
+    select: { alias: true, name: true },
+  });
+
+  const totalsByAlias = new Map(totals.map((total) => [total.alias, total]));
   const leaderboard = rankEntries(
-    participants.map((p) => ({
-      id: p.id,
-      name: p.name,
-      alias: p.alias,
-      totalPoints: totalsById.get(p.id)?._sum.points ?? 0,
-      entries: totalsById.get(p.id)?._count ?? 0,
+    participants.map((participant) => ({
+      alias: participant.alias,
+      name: participant.name,
+      totalPoints: totalsByAlias.get(participant.alias)?._sum.points ?? 0,
+      entries: totalsByAlias.get(participant.alias)?._count ?? 0,
     }))
   );
 
-  const meEntry = participantId ? participants.find((p) => p.id === participantId) : undefined;
-
   return {
-    me: meEntry
+    me: me
       ? {
-          id: meEntry.id,
-          name: meEntry.name,
-          scores: myScores.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() })),
+          alias: me.alias,
+          name: me.name,
+          scores: myScores.map((score) => ({ ...score, createdAt: score.createdAt.toISOString() })),
         }
       : null,
     leaderboard,
-    recent: recent.map((s) => ({
-      id: s.id,
-      participantName: s.participant.name,
-      game: s.game,
-      points: s.points,
-      createdAt: s.createdAt.toISOString(),
+    recent: recent.map((score) => ({
+      id: score.id,
+      participantName: score.participant.name,
+      game: score.game,
+      points: score.points,
+      createdAt: score.createdAt.toISOString(),
     })),
-    games: games.map((g) => g.game),
+    games: event.games,
   };
 }

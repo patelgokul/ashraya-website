@@ -1,19 +1,16 @@
 "use client";
 import { useState } from "react";
-import { ExternalLink, Loader2, Plus } from "lucide-react";
+import { Building2, ExternalLink, Loader2, Plus } from "lucide-react";
 import { useGameBoard } from "@/hooks/useGameBoard";
 import { useScoreFanfare } from "@/hooks/useScoreFanfare";
 import { RegisterCard } from "./RegisterCard";
 import { Leaderboard } from "./Leaderboard";
 import { AddPointsDialog } from "./AddPointsDialog";
 import { MyScores, RecentActivity } from "./ScorePanels";
+import type { GameEventDetails } from "@/types/games";
 
-const eventDeepLink =
-  process.env.NEXT_PUBLIC_GAME_EVENT_URL?.trim() ||
-  "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D";
-
-export function GameDay() {
-  const { board, refresh } = useGameBoard();
+export function GameDay({ event }: { event: GameEventDetails }) {
+  const { board, refresh } = useGameBoard(event.id);
   useScoreFanfare(board);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -26,58 +23,61 @@ export function GameDay() {
   }
 
   if (!board.me) {
-    return <RegisterCard onRegistered={refresh} />;
+    return <RegisterCard company={event.company} onRegistered={refresh} />;
   }
 
-  const myEntry = board.leaderboard.find((entry) => entry.id === board.me?.id);
+  async function switchAlias() {
+    await fetch("/api/games/register", { method: "DELETE" });
+    await refresh();
+  }
+
+  const myEntry = board.leaderboard.find((entry) => entry.alias === board.me?.alias);
+  const isMicrosoft = event.company.trim().toLowerCase() === "microsoft";
 
   return (
     <div className="pb-24 lg:pb-0">
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          {event.givingUrl && <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-orange-50 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-                <svg viewBox="0 0 23 23" className="h-6 w-6" aria-hidden="true">
-                  <rect x="1" y="1" width="9.5" height="9.5" fill="#f25022" />
-                  <rect x="12.5" y="1" width="9.5" height="9.5" fill="#7fba00" />
-                  <rect x="1" y="12.5" width="9.5" height="9.5" fill="#00a4ef" />
-                  <rect x="12.5" y="12.5" width="9.5" height="9.5" fill="#ffb900" />
-                </svg>
+                {isMicrosoft ? (
+                  <svg viewBox="0 0 23 23" className="h-6 w-6" aria-hidden="true">
+                    <rect x="1" y="1" width="9.5" height="9.5" fill="#f25022" />
+                    <rect x="12.5" y="1" width="9.5" height="9.5" fill="#7fba00" />
+                    <rect x="1" y="12.5" width="9.5" height="9.5" fill="#00a4ef" />
+                    <rect x="12.5" y="12.5" width="9.5" height="9.5" fill="#ffb900" />
+                  </svg>
+                ) : (
+                  <Building2 className="h-6 w-6 text-blue-700" />
+                )}
               </span>
               <div>
-                <p className="font-bold text-gray-900">Ashraya Shiksha Sarthi</p>
-                <h3 className="mt-0.5 font-semibold text-gray-900">Give through Microsoft</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  Opens the Benevity giving page. Best on your phone.
-                </p>
+                <p className="font-bold text-gray-900">{isMicrosoft ? "Ashraya Shiksha Sarthi" : event.company}</p>
+                <h3 className="mt-0.5 font-semibold text-gray-900">Give through {event.company}</h3>
+                <p className="mt-1 text-sm text-gray-600">Opens the giving page. Best on your phone.</p>
               </div>
             </div>
-            {eventDeepLink ? (
-              <a
-                href={eventDeepLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 sm:w-auto"
-              >
-                Open Giving Page <ExternalLink className="h-4 w-4" />
-              </a>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-300 px-5 py-3 text-sm font-bold text-gray-600 sm:w-auto"
-              >
-                Event link coming soon
-              </button>
-            )}
-          </div>
-          <Leaderboard entries={board.leaderboard} meId={board.me.id} />
+            <a
+              href={event.givingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 sm:w-auto"
+            >
+              Open Giving Page <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>}
+          <Leaderboard entries={board.leaderboard} meAlias={board.me.alias} />
         </div>
 
         <div className="space-y-6">
           <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl p-5 shadow-sm">
-            <p className="text-sm text-blue-100">Hi, {board.me.name}</p>
+            <div className="flex items-center justify-between gap-2 text-sm text-blue-100">
+              <p className="truncate">Hi, {board.me.name}</p>
+              <button onClick={switchAlias} className="flex-shrink-0 text-xs text-blue-200 underline hover:text-white">
+                Not you?
+              </button>
+            </div>
             <div className="flex items-end justify-between mt-2">
               <div>
                 <p className="font-display text-4xl font-bold tabular-nums">{myEntry?.totalPoints ?? 0}</p>
@@ -110,7 +110,7 @@ export function GameDay() {
         </button>
       </div>
 
-      <AddPointsDialog open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} />
+      <AddPointsDialog eventId={event.id} games={event.games} open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} />
     </div>
   );
 }

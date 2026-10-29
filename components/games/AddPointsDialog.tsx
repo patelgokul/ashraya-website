@@ -4,18 +4,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { X } from "lucide-react";
-import { GAME_OPTIONS, GameScoreSchema, MAX_POINTS_PER_ENTRY, type GameScoreInput } from "@/lib/validations/game";
+import { GameScoreSchema, MAX_POINTS_PER_ENTRY, type GameScoreInput } from "@/lib/validations/game";
 
 const inputClass =
   "w-full border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors";
 
 interface Props {
+  eventId: string;
+  games: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdded: () => Promise<void>;
 }
 
-export function AddPointsDialog({ open, onOpenChange, onAdded }: Props) {
+export function AddPointsDialog({ eventId, games, open, onOpenChange, onAdded }: Props) {
   const [serverError, setServerError] = useState<string | null>(null);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<GameScoreInput>({
     resolver: zodResolver(GameScoreSchema),
@@ -31,7 +33,7 @@ export function AddPointsDialog({ open, onOpenChange, onAdded }: Props) {
 
   async function onSubmit(data: GameScoreInput) {
     setServerError(null);
-    const res = await fetch("/api/games/scores", {
+    const res = await fetch(`/api/games/events/${eventId}/scores`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -66,7 +68,7 @@ export function AddPointsDialog({ open, onOpenChange, onAdded }: Props) {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Game</label>
               <select {...register("game")} defaultValue="" className={`${inputClass} bg-white`}>
                 <option value="" disabled>Select a game</option>
-                {GAME_OPTIONS.map((game) => <option key={game} value={game}>{game}</option>)}
+                {games.map((game) => <option key={game} value={game}>{game}</option>)}
               </select>
               {errors.game && <p className="text-red-500 text-xs mt-1">{errors.game.message}</p>}
             </div>
