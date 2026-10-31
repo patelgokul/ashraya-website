@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -302,4 +303,44 @@ model FundPrediction {
   actualMonthly       Float?
   modelVersion        String   @default("v1.0-heuristic")
   createdAt           DateTime @default(now())
+}
+
+// ─── GAME DAY ────────────────────────────────────
+
+model GameEvent {
+  id        String      @id @default(cuid())
+  title     String
+  company   String
+  location  String
+  eventDate DateTime    @db.Date
+  games     String[]
+  givingUrl String?
+  createdAt DateTime    @default(now())
+  scores    GameScore[]
+
+  @@index([eventDate])
+}
+
+/// alias is stored lowercase and is the login: entering it again on any device signs that player in.
+model GameParticipant {
+  alias     String      @id
+  name      String
+  phone     String?
+  createdAt DateTime    @default(now())
+  scores    GameScore[]
+}
+
+model GameScore {
+  id          String          @id @default(cuid())
+  alias       String
+  eventId     String
+  game        String
+  points      Int
+  createdAt   DateTime        @default(now())
+  participant GameParticipant @relation(fields: [alias], references: [alias])
+  event       GameEvent       @relation(fields: [eventId], references: [id])
+
+  @@index([alias])
+  @@index([eventId, createdAt])
+  @@index([createdAt])
 }

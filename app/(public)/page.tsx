@@ -1,10 +1,5 @@
-import { HeroSection }   from "@/components/home/HeroSection";
+import { DeferredSections } from "@/components/home/DeferredSections";
 import { PresenceMap }   from "@/components/home/PresenceMap";
-import { AboutSection }  from "@/components/home/AboutSection";
-import { CorePillars }   from "@/components/home/CorePillars";
-import { ImpactStats }   from "@/components/home/ImpactStats";
-import { Testimonials }  from "@/components/home/Testimonials";
-import { Newsletter }    from "@/components/home/Newsletter";
 import { ProjectCard }   from "@/components/projects/ProjectCard";
 import { PROJECTS }      from "@/lib/content";
 import { SITE }          from "@/lib/site";
@@ -17,13 +12,13 @@ export const metadata: Metadata = {
   description: SITE.description,
 };
 
+export const dynamic = "force-static";
+
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
+      <DeferredSections placement="top" />
       <PresenceMap />
-      <AboutSection />
-      <CorePillars />
 
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -47,9 +42,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <ImpactStats />
-      <Testimonials />
-      <Newsletter />
+      <DeferredSections placement="bottom" />
     </>
   );
 }

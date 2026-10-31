@@ -21,6 +21,7 @@ const navLinks = [
   { label: "Impact", href: "/impact" },
   { label: "Vision & Mission", href: "/vision-mission" },
   { label: "Volunteer", href: "/volunteer" },
+  { label: "Events", href: "/games" },
   { label: "Contact", href: "/contact" },
 ];
 
