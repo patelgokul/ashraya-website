@@ -6,8 +6,27 @@ import { VERTICALS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: `Learn about ${SITE.name} — our story, values, and the seven ASHRAYA verticals.`,
+  description: `${SITE.legalName} — registered non-government company, our mission, directors, and the work of ${SITE.name}.`,
 };
+
+const MISSION =
+  "Ashraya Vikas Association is committed to empowering underprivileged communities across India by providing compassionate, inclusive services that tackle the root causes of inequality. We promote welfare through non-institutional solutions, family support, and community partnerships, ensuring every individual—regardless of background—can achieve a dignified and self-reliant life.";
+
+const REGISTRATION = [
+  { label: "Registered name", value: "Ashraya Vikas Association" },
+  { label: "CIN", value: "U88900KA2025NPL206777" },
+  {
+    label: "Registered office",
+    value:
+      "WeWork Vaishnavi Signature, No. 78/9, Outer Ring Road, Bellandur, Bangalore South, Karnataka 560103, India",
+  },
+  { label: "Registered email", value: "office@ashrayavikas.in" },
+];
+
+const DIRECTORS = [
+  { name: "Shreyash Bhaskar Patil", role: "Director" },
+  { name: "Hemant Chandrashekhar Wade", role: "Director" },
+];
 
 const VALUES = [
   { icon: "🤲", title: "Selflessness",            desc: "Serving others without expecting anything in return." },
@@ -38,7 +57,8 @@ export default function AboutPage() {
           <h2 className="font-display text-3xl font-bold text-gray-900 mb-6">Who We Are</h2>
           <div className="text-gray-600 text-lg leading-relaxed space-y-4">
             <p>
-              {SITE.name} believes that each individual should care for society.
+              <strong className="text-gray-900">{SITE.legalName}</strong> is the registered name of {SITE.name}.
+              We believe that each individual should care for society.
               Our work and events are open to everyone who is passionate about creating a better,
               more empathetic society.
             </p>
@@ -51,6 +71,44 @@ export default function AboutPage() {
               Ashraya is present at 27 locations across 18 cities and 13 states and union territories,
               running centres, libraries, Jan Sewa Kendras, and community kitchens.
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-orange-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <h2 className="font-display text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
+          <p className="text-gray-800 text-lg leading-relaxed">{MISSION}</p>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <h2 className="font-display text-3xl font-bold text-gray-900 mb-3">Registered Organisation</h2>
+          <p className="text-gray-500 mb-8">
+            Details as registered with the Ministry of Corporate Affairs.
+          </p>
+          <dl className="bg-gray-50 rounded-2xl border border-gray-100 divide-y divide-gray-100">
+            {REGISTRATION.map((item) => (
+              <div key={item.label} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 px-5 py-4">
+                <dt className="text-sm font-semibold text-gray-500">{item.label}</dt>
+                <dd className="sm:col-span-2 text-gray-900">{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <h2 className="font-display text-3xl font-bold text-gray-900 mb-3">Board of Directors</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-8">
+            {DIRECTORS.map((director) => (
+              <div key={director.name} className="bg-white rounded-2xl p-6 border border-gray-100">
+                <h3 className="font-display text-xl font-bold text-gray-900">{director.name}</h3>
+                <p className="text-blue-700 font-semibold mt-1">{director.role}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

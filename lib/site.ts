@@ -13,7 +13,7 @@ export const SITE = {
   logo:       "/icons/ashraya-logo.png",
   icon:       "/icons/ashraya-icon.png",
   contact: {
-    email:        env(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "gokul4cp@gmail.com"),
+    email:        env(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "office@ashrayavikas.in"),
     phone,
     phoneDisplay: `+91 ${phone.slice(0, 5)} ${phone.slice(5)}`,
     phoneHref:    `tel:+91${phone}`,
