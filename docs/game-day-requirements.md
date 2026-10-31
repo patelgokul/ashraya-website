@@ -35,7 +35,7 @@ Section 15 lists what must ship by Wednesday (P0) vs. what can wait.
 - Real authentication (passwords, OTP, email verification). Alias-only is intentional.
 - Real-time WebSockets. Polling is enough.
 - A general-purpose quiz builder UI. Admin content can be seeded by script/JSON for this event.
-- A real vulnerable SQL database. See §6.1.7 for the safe simulation.
+- A real vulnerable SQL database. See §6.1.1 for the safe simulation.
 
 ---
 
@@ -165,9 +165,9 @@ The numbering in the original brief had duplicates; this is the corrected order:
 
 Rounds are **data, not code**: each section is a `GameRound` row with an `order`, so the organizer can reorder or swap section 16 without a deploy.
 
-**Rough timing:** songs 5 × ~3 min, riddles 3 × ~2 min, hunt ~30 min, verify ~5 min, scribble 2 × ~5 min, form ~3 min. Total ≈ **75 min** plus host talk.
+**Rough timing:** songs 5 × ~3 min, riddles 3 × ~2 min, hunt ~40 min, verify ~5 min, scribble 2 × ~5 min, form ~3 min. Total ≈ **85 min** plus host talk (the hunt overlaps later rounds).
 
-**Hunt runs in the background:** once the hunt starts, levels stay open until the **hunt deadline** **[Default: 35 min after L1 opens]**. Admin can open section 9 onward while slower teams are still on L4/L5; players just switch sections.
+**Hunt runs in the background:** once the hunt starts, levels stay open until the **hunt deadline** **[Default: 45 min after L1 opens]**. Admin can open section 9 onward while slower teams are still on L4/L5; players just switch sections.
 
 ### 5.2 Section (accordion) states
 
@@ -211,12 +211,15 @@ A sticky timer in the top-right corner, always visible:
 
 **Mechanics**
 - Teams of up to 5. Any member can submit; the **first correct submission solves the level for the whole team**. Teammates see the unlock within one poll cycle.
-- Each level reveals a **key** (a word) and a **clue to the next level**. Keys from L1–L4 combine to open the **final vault** in L5.
+- Each level's puzzle reveals two things: that level's **key** and the **link where the next level starts**. The next level's card does not show that link ("Use what the last level revealed"), so levels are chained.
+- **Key format:** `keyN_<15–20 random letters/digits>_<word>`. The words of key1–key5 spell the mission: **Let's change one Person's World**. The random part makes later keys unguessable even when earlier ones are known.
 - Only L1 is unlocked at the start (when admin opens the hunt). L(n+1) unlocks when the team solves L(n). **L4 additionally requires the player to have submitted the verification** (§6.4).
-- Answers are validated **server-side only**. Answers and hint texts are never in the page bundle or in API responses for locked levels.
+- **After a level is solved, its card shows the "next" link again** (`revealOnSolve` in the seed), so a refresh or a teammate who missed it doesn't block the team.
+- Solving **L5 wins.** The winner screen assembles the five words: "Let's change one Person's World". There is no separate vault input.
+- Answers are validated **server-side only**. Answers, hint texts and `revealOnSolve` are never in the page bundle or in API responses for locked/unsolved levels.
 - **Rate limit:** 1 attempt per team per 3 s. Unlimited attempts otherwise (it's a puzzle, not a quiz).
-- Hunt keys use **near-exact matching**: case/space/punctuation-insensitive, threshold 0.95 (§7). Keys should be single distinctive words.
-- **Device note on the page:** "The hunt works best on a laptop — you'll need Inspect Element, downloads and maybe a script."
+- **Key matching is not fuzzy** (use `matchHuntKey` from the handoff, not §7): `keyN` prefix case-insensitive, random part **exact and case-sensitive**, word case-insensitive with the apostrophe optional; surrounding spaces/quotes ignored. If someone submits a key for a different level, say so ("That's your Level 2 key").
+- **Device note on the page:** "The hunt works best on a laptop — you'll need View Source, downloads and maybe a script."
 
 **Hints (per level)**
 - Three hints, opened in order (Hint 2 requires Hint 1).
@@ -224,34 +227,38 @@ A sticky timer in the top-right corner, always visible:
 
 | Hint opened | Deduction (configurable `a, b, c`) | Multiplier |
 |---|---|---|
-| None / Hint 1 | **a = 0%** | × 1.0 |
+| None | — | × 1.0 |
+| Hint 1 | **a = 20%** | × 0.8 |
 | Hint 2 | **b = 50%** | × 0.5 |
 | Hint 3 | **c = 80%** | × 0.2 |
 
 - Opening a hint asks for confirmation: "Hint 2 will reduce this level's points by 50%. Open it?"
+- Hint 3 always repeats where the level starts, so a team that lost the link can still continue (at a cost).
 - Hints are **shared per team** (one teammate opens it, all see it, the whole team takes the penalty).
 - Suggested hint ladder: Hint 1 = gentle nudge, Hint 2 = names the tool or technique, Hint 3 = near-walkthrough.
 
-#### 6.1.1 Level plan (7 challenge ideas folded into 5 levels)
+#### 6.1.1 Level plan (increasing difficulty: 1, 2, 2, 2, 3 methods)
 
-Five levels in ~30 min means each level must be solvable in ~5 min by a non-technical team. Easiest first:
+| Level | Title | Methods | Est. mins |
+|---|---|---|---|
+| **L1** | The Page Remembers | HTML page source | 3 |
+| **L2** | A File Without a Name | Missing file extension → QR code | 6 |
+| **L3** | Listen With Your Eyes | Audio spectrogram → Base64 | 8 |
+| — | **Verify** (gate, §6.4) | Benevity screenshot | — |
+| **L4** | The Needle and the Eraser | 100 files (script or AI) → deleted git commit | 12 |
+| **L5** | The Foolish Door | EXIF metadata → Base64 → simulated SQL-injection login | 12 |
 
-| Level | Theme | Challenge | How to solve | Tools players may use |
-|---|---|---|---|---|
-| **L1** | "Look closer" | **HTML inspection + website hunt.** The level shows a clue: "Our story hides more than it says." A hidden HTML comment / `display:none` span on `/about` (or a dedicated hunt page) contains the key. | Visit the page, right-click → Inspect / View Source, find the comment. | Browser DevTools |
-| **L2** | "Not what it seems" | **File extension mystery + basic crypto.** Download `clue` (a PNG without extension). Renamed to `.png`, the image shows a Base64 or Caesar-shifted string; decoding it gives the key. | Rename the file, open the image, decode the string. | Any OS, base64decode.org / CyberChef |
-| **L3** | "Pieces" | **QR puzzle.** 4–6 image fragments of a QR code (some rotated). Assembled, the QR scans to a short text or URL with the key. | Arrange the pieces in any image editor, a slide, or on paper, and scan with a phone. | Canva / Slides / Paint, phone camera |
-| — | **Verify** | (Section 6, gate) | | |
-| **L4** | "Listen" | **Audio spectrogram.** A short audio file (~10 s, sounds like noise or a melody) with the key "drawn" into its spectrogram. | Load it into a spectrogram viewer and read the word. | Audacity (Spectrogram view), Sonic Visualiser, any online spectrum analyzer |
-| **L5** | "Needle in a haystack" + **Final vault** | **100-file challenge.** A page lists 100 links (`/hunt/files/0001.txt` … `0100.txt`) with random-looking content; exactly one contains the final key fragment. Then the **vault** asks for the combined passphrase: the L1–L5 keys in order, e.g. `SEVA-ASHA-…`. | Write a tiny script, or ask an AI to write one (allowed and encouraged), to fetch all files and search for the pattern. Combine the keys. | Python / JS / curl, ChatGPT or Gemini |
+**Hunt deadline [Default]:** 45 min after L1 opens.
 
-**Bonus / alternates** (use if a level is too hard in rehearsal, or as optional bonus points):
-- **Git history:** a small public GitHub repo where the key was "accidentally" committed and then deleted in a later commit. Solve via the commit history on GitHub.
-- **Beginner CTF – SQL injection (safe simulation):** a fake "Ashraya staff login" page. **No real database, no real query is ever run.** The server checks whether the username matches a classic payload pattern (e.g. `' OR '1'='1`) and returns the key if so. It teaches the concept without ever exposing a vulnerability.
+**The puzzle content is already built** by the organizer in a separate private kit (not in this repo, because this repo is public and the content reveals answers):
+- The puzzle files live on a **separate static site** (`ashraya-hunt` on Cloudflare Workers static assets), not under this site's `public/`. The website only links to it from the L1 card.
+- The SQL-injection login is **simulated**: a static page where the key is encrypted with the exact username. No database or query exists.
+- The organizer sends the developer **`treasure-hunt.seed.json`** (per level: `title`, `card`, `answer`, `hints[{order, penaltyPct, text}]`, `revealOnSolve`, `requiresVerification`, `isFinal`) and **`matchHuntKey.ts`** privately.
 
-**Hosting hunt files:** all as **static assets** under `public/hunt/…` (free, no Worker CPU). Use unguessable folder names (e.g. `public/hunt/7f3k/`) so people can't browse ahead, and don't link L(n+1) assets from anywhere public before the event.
-
-**Content owner (organizer, not the developer):** creates the audio, QR fragments, PNG, 100 files, keys, and 3 hints per level. The developer provides the slots (`mediaUrl`, `downloads[]`, `hints[]`, `acceptedAnswers[]`). The spectrogram audio can be generated with a small Python script (draw text into a spectrogram, then inverse STFT) or with tools like Coagula.
+**Developer requirements for the seed:**
+- Load it into the DB from a **gitignored** file. Never commit it, never send `answer`/`hints`/`revealOnSolve` to the browser before they're earned.
+- Render `card` for unlocked levels, hints on request (§ hints), and `revealOnSolve` once solved.
+- L1's `card` contains the hunt site URL; L2–L5 cards intentionally contain no links.
 
 #### 6.1.2 Hunt scoring
 - Per level: `maxPoints = 1000`, time-decayed from **the team's unlock time for that level** (§8), then × hint multiplier.
@@ -345,7 +352,7 @@ One response per player per event (editable). Admin CSV export. **[P2]** Push ap
 
 ## 7. Fuzzy answer matching
 
-All matching runs **on the server**. Each question has `acceptedAnswers: string[]` and `matchThreshold` (0.80–0.95, **[Default] 0.85**; hunt keys 0.95).
+All matching runs **on the server**. Each question has `acceptedAnswers: string[]` and `matchThreshold` (0.80–0.95, **[Default] 0.85**). Hunt keys don't use fuzzy matching (see §6.1).
 
 **Normalize both input and each accepted answer:**
 1. Unicode NFKD, strip diacritics, lowercase, trim.
@@ -708,7 +715,7 @@ All under `/api/games`. Player routes require the alias cookie; admin routes req
 | Q2 | Team prize eligibility when some members lack ✓? | The team can still win; only members with ✓ receive the prize. |
 | Q3 | Should players be able to join teams themselves, or only be added by a captain? | Both. |
 | Q4 | Attempt limit for songs, riddles and scribble? | 3 per question. |
-| Q5 | Should the hunt have a hard deadline? | 35 min after L1 opens. |
+| Q5 | Should the hunt have a hard deadline? | 45 min after L1 opens. |
 | Q6 | Section 16: Scribble 2 or Emoji Movie? | Emoji Movie. |
 | Q7 | Prizes: how many winners per board? | Top 3 individual, top 1 team (organizer to confirm). |
 | Q8 | Should verification block L4 for the whole team or per player? | Per player (each player needs to submit to see/submit L4–L5). |
