@@ -42,15 +42,17 @@ function rankEntries(entries: Omit<LeaderboardEntry, "rank">[]): LeaderboardEntr
 }
 
 export async function listGameEvents(): Promise<GameEventSummary[]> {
-  const [events, players] = await Promise.all([
+  const [events, players, registrations] = await Promise.all([
     prisma.gameEvent.findMany({ orderBy: [{ eventDate: "desc" }, { createdAt: "desc" }] }),
     prisma.gameScore.groupBy({ by: ["eventId", "alias"] }),
+    prisma.gameRegistration.findMany({ select: { eventId: true, alias: true } }),
   ]);
 
-  const playerCounts = players.reduce<Map<string, number>>(
-    (counts, { eventId }) => counts.set(eventId, (counts.get(eventId) ?? 0) + 1),
-    new Map()
-  );
+  const attendees = new Map<string, Set<string>>();
+  for (const { eventId, alias } of [...players, ...registrations]) {
+    if (!attendees.has(eventId)) attendees.set(eventId, new Set());
+    attendees.get(eventId)!.add(alias);
+  }
 
   return events.map((event) => ({
     id: event.id,
@@ -60,7 +62,7 @@ export async function listGameEvents(): Promise<GameEventSummary[]> {
     eventDate: event.eventDate.toISOString().slice(0, 10),
     games: event.games,
     givingUrl: event.givingUrl,
-    participantCount: playerCounts.get(event.id) ?? 0,
+    participantCount: attendees.get(event.id)?.size ?? 0,
   }));
 }
 
@@ -74,19 +76,19 @@ export async function getGameBoard(
   const [totals, recent, myScores] = await Promise.all([
     prisma.gameScore.groupBy({
       by: ["alias"],
-      where: { eventId },
+      where: { eventId, teamId: null, voidedAt: null },
       _sum: { points: true },
       _count: true,
     }),
     prisma.gameScore.findMany({
-      where: { eventId },
+      where: { eventId, teamId: null, voidedAt: null },
       orderBy: { createdAt: "desc" },
       take: 15,
       select: { id: true, game: true, points: true, createdAt: true, participant: { select: { name: true } } },
     }),
     me
       ? prisma.gameScore.findMany({
-          where: { eventId, alias: me.alias },
+          where: { eventId, alias: me.alias, teamId: null, voidedAt: null },
           orderBy: { createdAt: "desc" },
           select: { id: true, game: true, points: true, createdAt: true },
         })

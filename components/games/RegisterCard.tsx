@@ -18,6 +18,7 @@ export function RegisterCard({ company, onRegistered }: { company: string; onReg
 
   async function onSubmit(data: GameRegisterInput) {
     setServerError(null);
+    try {
     const res = await fetch("/api/games/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,13 +29,16 @@ export function RegisterCard({ company, onRegistered }: { company: string; onReg
       const fieldErrors: FieldErrors = body?.error?.fieldErrors ?? {};
       const fields = Object.entries(fieldErrors) as [keyof GameRegisterInput, string[]][];
       if (fields.length === 0) {
-        setServerError("Registration failed. Please try again.");
+        setServerError(typeof body?.error === "string" ? body.error : "Registration failed. Please try again.");
         return;
       }
       fields.forEach(([field, messages]) => setError(field, { message: messages[0] }));
       return;
     }
     await onRegistered();
+    } catch {
+      setServerError("Could not connect. Please try again.");
+    }
   }
 
   return (
@@ -42,31 +46,21 @@ export function RegisterCard({ company, onRegistered }: { company: string; onReg
       <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <h2 className="font-display text-2xl font-bold text-gray-900 mb-1">Join the Game</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Register once and play every event. Already registered? Just enter the same alias to sign in on any phone.
+          Pick something unique, like priya_blr_42. Use the same alias on another device to return. Anyone who knows your alias can sign in as you.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Your {company} Alias</label>
-            <input {...register("alias")} placeholder="e.g. akp" autoComplete="nickname" autoCapitalize="none" className={inputClass} />
+            <label htmlFor="game-alias" className="block text-sm font-medium text-gray-700 mb-1.5">Your {company} Alias</label>
+            <input id="game-alias" {...register("alias")} aria-label="Your alias" placeholder="priya_blr_42" autoComplete="nickname" autoCapitalize="none" maxLength={20} className={inputClass} />
             {errors.alias && <p className="text-red-500 text-xs mt-1">{errors.alias.message}</p>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Name</label>
-            <input {...register("name")} placeholder="e.g. Anurag Kumar Pandey" autoComplete="name" className={inputClass} />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Number</label>
-            <input {...register("phone")} placeholder="10-digit mobile number" inputMode="numeric" autoComplete="tel-national" className={inputClass} />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
-          </div>
 
-          {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
+          {serverError && <p role="alert" className="text-red-500 text-sm">{serverError}</p>}
 
           <button type="submit" disabled={isSubmitting}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl transition-colors text-sm">
-            {isSubmitting ? "Joining..." : "Join & See Leaderboard →"}
+            {isSubmitting ? "Joining..." : "Join Game Day"}
           </button>
         </form>
       </div>

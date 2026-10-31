@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { Activity, Trash2 } from "lucide-react";
+import { Activity } from "lucide-react";
 import type { MyScore, RecentScore } from "@/types/games";
 
 function timeAgo(iso: string) {
@@ -11,22 +10,12 @@ function timeAgo(iso: string) {
   return `${Math.round(minutes / 60)} hr ago`;
 }
 
-export function MyScores({ scores, onDeleted }: { scores: MyScore[]; onDeleted: () => Promise<void> }) {
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  async function handleDelete(score: MyScore) {
-    if (!window.confirm(`Remove ${score.points} points for ${score.game}?`)) return;
-    setDeletingId(score.id);
-    await fetch(`/api/games/scores/${score.id}`, { method: "DELETE" });
-    await onDeleted();
-    setDeletingId(null);
-  }
-
+export function MyScores({ scores }: { scores: MyScore[] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
       <h3 className="font-semibold text-gray-900 px-5 py-4 border-b border-gray-100">Your Entries</h3>
       {scores.length === 0 ? (
-        <p className="px-5 py-6 text-sm text-gray-500">No points yet. Play a game and add your score!</p>
+        <p className="px-5 py-6 text-sm text-gray-500">No points yet. Correct answers earn points.</p>
       ) : (
         <ul className="divide-y divide-gray-50 max-h-72 overflow-y-auto">
           {scores.map((score) => (
@@ -36,14 +25,6 @@ export function MyScores({ scores, onDeleted }: { scores: MyScore[]; onDeleted: 
                 <p className="text-xs text-gray-400">{timeAgo(score.createdAt)}</p>
               </div>
               <span className="text-sm font-bold text-gray-900 tabular-nums">+{score.points}</span>
-              <button
-                onClick={() => handleDelete(score)}
-                disabled={deletingId === score.id}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-40"
-                aria-label={`Remove ${score.game} entry`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </li>
           ))}
         </ul>

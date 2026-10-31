@@ -2,6 +2,10 @@
 
 > Production-ready NGO platform built with Next.js 15, TypeScript, Tailwind CSS, Prisma, and PostgreSQL.
 
+## Game Day
+
+See [the Game Day runbook](docs/game-day-implementation.md) for the local rehearsal, private content import, database upgrade, host controls, verification fallback, tests, and production release gates.
+
 ## 🚀 Quick Start
 
 ```bash
