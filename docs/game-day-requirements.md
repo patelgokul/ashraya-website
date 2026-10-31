@@ -243,7 +243,7 @@ A sticky timer in the top-right corner, always visible:
 |---|---|---|---|
 | **L1** | The Page Remembers | HTML page source | 3 |
 | **L2** | A File Without a Name | Missing file extension → QR code | 6 |
-| **L3** | Listen With Your Eyes | Audio spectrogram → Base64 | 8 |
+| **L3** | Listen With Your Eyes | Audio spectrogram → ASCII +4 (subtract 4 from every character) | 8 |
 | — | **Verify** (gate, §6.4) | Benevity screenshot | — |
 | **L4** | The Needle and the Eraser | 100 files (script or AI) → deleted git commit | 12 |
 | **L5** | The Foolish Door | EXIF metadata → Base64 → simulated SQL-injection login | 12 |
