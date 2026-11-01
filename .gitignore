@@ -27,3 +27,8 @@ next-env.d.ts
 
 # prisma
 prisma/migrations
+
+# Private event content and local rehearsal data
+extra_info/
+.game-day/
+*.private.json

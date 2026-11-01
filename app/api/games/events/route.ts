@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { listGameEvents } from "@/lib/games";
+import { getCurrentParticipant, listGameEvents } from "@/lib/games";
 import { GameEventSchema } from "@/lib/validations/game";
+import { checkOrigin, gameRoute, hasAdminSession, requireGameAdmin } from "@/lib/game-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const events = await listGameEvents();
-  return NextResponse.json({ events }, { headers: { "Cache-Control": "no-store" } });
+  return gameRoute(async () => {
+    const [events, player] = await Promise.all([listGameEvents(), getCurrentParticipant()]);
+    return NextResponse.json({ events, canCreate: !!player?.isAdmin && hasAdminSession(player.alias) }, { headers: { "Cache-Control": "no-store" } });
+  });
 }
 
 export async function POST(req: NextRequest) {
+  return gameRoute(async () => {
+  checkOrigin(req);
+  const admin = await requireGameAdmin();
   const body = await req.json().catch(() => null);
   const result = GameEventSchema.safeParse(body);
   if (!result.success) {
@@ -29,5 +35,7 @@ export async function POST(req: NextRequest) {
     select: { id: true },
   });
 
+  await prisma.gameAudit.create({ data: { actor: admin.alias, eventId: event.id, action: "event.create", detail: { title: result.data.title } } });
   return NextResponse.json(event, { status: 201 });
+  });
 }

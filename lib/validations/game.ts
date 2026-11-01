@@ -4,24 +4,12 @@ export const MAX_POINTS_PER_ENTRY = 1000;
 
 const collapseSpaces = (value: string) => value.trim().replace(/\s+/g, " ");
 
-export const NAME_REQUIRED_MESSAGE = "Please enter your name to register";
-
 export const GameRegisterSchema = z.object({
-  name: z
-    .string()
-    .optional()
-    .transform((value) => (value ? collapseSpaces(value) : undefined) || undefined)
-    .pipe(z.string().min(2, "Name must be at least 2 characters").max(40, "Name must be 40 characters or fewer").optional()),
   alias: z
     .string({ required_error: "Alias is required" })
-    .transform((value) => collapseSpaces(value).toLowerCase())
-    .pipe(z.string().min(2, "Alias must be at least 2 characters").max(30, "Alias must be 30 characters or fewer")),
-  phone: z
-    .string()
-    .trim()
-    .optional()
-    .transform((value) => value || undefined)
-    .pipe(z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit mobile number").optional()),
+    .transform((value) => value.trim().toLowerCase())
+    .pipe(z.string().regex(/^[a-z0-9_-]{3,20}$/, "Use 3-20 letters, numbers, underscores or hyphens")
+      .refine((value) => !["admin", "host", "ashraya", "system"].includes(value), "This alias is reserved")),
 });
 
 export const GAME_OPTIONS = [

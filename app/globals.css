@@ -30,3 +30,16 @@ body {
 .font-display {
   font-family: Georgia, "Times New Roman", serif;
 }
+
+@keyframes game-answer-shake {
+  25%, 75% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+}
+
+.game-answer-shake { animation: game-answer-shake 180ms ease-in-out; }
+.game-day { letter-spacing: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .game-answer-shake { animation: none; }
+  .game-day * { scroll-behavior: auto; transition: none; }
+}

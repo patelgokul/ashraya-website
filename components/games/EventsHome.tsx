@@ -13,6 +13,7 @@ export function EventsHome() {
   const router = useRouter();
   const [events, setEvents] = useState<GameEventSummary[] | null>(null);
   const [creating, setCreating] = useState(false);
+  const [canCreate, setCanCreate] = useState(false);
   const [title, setTitle] = useState("");
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
@@ -25,7 +26,7 @@ export function EventsHome() {
   useEffect(() => {
     fetch("/api/games/events", { cache: "no-store" })
       .then((res) => res.json())
-      .then((data: { events: GameEventSummary[] }) => setEvents(data.events))
+      .then((data: { events: GameEventSummary[]; canCreate: boolean }) => { setEvents(data.events); setCanCreate(data.canCreate); })
       .catch(() => setEvents([]));
   }, []);
 
@@ -63,7 +64,7 @@ export function EventsHome() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      {canCreate && <div className="flex justify-end">
         <button
           type="button"
           onClick={() => setCreating((open) => !open)}
@@ -71,7 +72,7 @@ export function EventsHome() {
         >
           <Plus className="h-4 w-4" /> {creating ? "Close form" : "Create new event"}
         </button>
-      </div>
+      </div>}
 
       {creating && (
         <form onSubmit={handleCreate} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm space-y-4">
@@ -134,7 +135,7 @@ export function EventsHome() {
         <p className="text-center text-sm text-gray-400 py-10">Loading events…</p>
       ) : events.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-gray-200 py-12 text-center text-sm text-gray-500">
-          No events yet. Create the first one.
+          No events are scheduled yet.
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">

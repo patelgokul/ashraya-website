@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { GameEventScreen } from "@/components/games/GameEventScreen";
+import { GameDay } from "@/components/games/GameDay";
 
 export const metadata: Metadata = {
-  title: "Live Leaderboard",
+  title: "Game Day",
 };
 
 export default function GameEventPage({ params }: { params: { eventId: string } }) {
-  return <GameEventScreen eventId={params.eventId} />;
+  return <GameDay eventId={params.eventId} />;
 }

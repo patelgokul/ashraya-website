@@ -1,32 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { GameScoreSchema } from "@/lib/validations/game";
-import { getCurrentParticipant } from "@/lib/games";
+import { adminActionSchema } from "@/lib/validations/game-day";
+import { GameError, checkOrigin, gameCommand, gameRoute, requireGameAdmin } from "@/lib/game-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest, { params }: { params: { eventId: string } }) {
-  const event = await prisma.gameEvent.findUnique({
-    where: { id: params.eventId },
-    select: { id: true, games: true },
+  return gameRoute(async () => {
+    checkOrigin(req);
+    const admin = await requireGameAdmin();
+    const action = adminActionSchema.parse({ ...await req.json(), action: "admin.score.award" });
+    if (action.action !== "admin.score.award" || (!action.alias && !action.teamId)) throw new GameError("Choose a player or team");
+    return NextResponse.json(await gameCommand(params.eventId, admin.alias, action.action, action));
   });
-  if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
-
-  const participant = await getCurrentParticipant();
-  if (!participant) return NextResponse.json({ error: "Please register first" }, { status: 401 });
-
-  const body = await req.json().catch(() => null);
-  const result = GameScoreSchema.safeParse(body);
-  if (!result.success) {
-    return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
-  }
-  if (!event.games.includes(result.data.game)) {
-    return NextResponse.json({ error: "Please select a game from this event" }, { status: 400 });
-  }
-
-  const score = await prisma.gameScore.create({
-    data: { alias: participant.alias, eventId: event.id, game: result.data.game, points: result.data.points },
-    select: { id: true },
-  });
-  return NextResponse.json(score, { status: 201 });
 }
