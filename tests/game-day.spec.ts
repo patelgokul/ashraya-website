@@ -62,14 +62,25 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     return result!;
   };
   try {
-    expect((await player.request.post("/api/games/register", { data: { alias: "admin" } })).status()).toBe(400);
-    expect((await player.request.post("/api/games/register", { data: { alias: playerAlias }, headers: { origin: "https://untrusted.invalid" } })).status()).toBe(403);
+    expect((await player.request.post("/api/games/register", { data: { alias: "admin", name: "Reserved", phone: "9876543210" } })).status()).toBe(400);
+    expect((await player.request.post("/api/games/register", { data: { alias: playerAlias, name: "Browser Player", phone: "9876543210" }, headers: { origin: "https://untrusted.invalid" } })).status()).toBe(403);
+    const missing = await player.request.post("/api/games/login", { data: { alias: `missing_${suffix}` } });
+    expect(missing.status()).toBe(404);
+    expect((await missing.json()).code).toBe("NOT_REGISTERED");
     await page.goto(`/games/${eventId}`);
-    await page.getByLabel("Your alias", { exact: true }).fill(playerAlias.toUpperCase());
-    await page.getByRole("button", { name: "Join Game Day" }).click();
+    await page.getByRole("button", { name: "Already registered? Log in" }).click();
+    await page.getByLabel("Your Ashraya alias", { exact: true }).fill(`missing_${suffix}`);
+    await page.getByRole("button", { name: "Log in", exact: true }).click();
+    await expect(page.getByText("This alias is not registered. Please register to continue.")).toBeVisible();
+    await page.getByLabel("Your Ashraya alias", { exact: true }).fill(playerAlias.toUpperCase());
+    await page.getByLabel("Your name", { exact: true }).fill("Browser Player");
+    await page.getByLabel("Contact number", { exact: true }).fill("9876543210");
+    await page.getByRole("button", { name: "Register", exact: true }).click();
     await expect(page.getByRole("heading", { name: "The playbook" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Log out", exact: true })).toBeVisible();
     const initial = await state();
     expect(initial.me?.alias).toBe(playerAlias);
+    expect(initial.me?.name).toBe("Browser Player");
     expect(initial.rounds).toHaveLength(17);
     expect(initial.rounds.filter((round) => round.state === "LOCKED").every((round) => !round.questions.length && !round.description)).toBeTruthy();
     expect(JSON.stringify(initial)).not.toContain("acceptedAnswers");
@@ -80,10 +91,10 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await page.getByRole("button", { name: "Create", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Browser Team", exact: true })).toBeVisible();
     const teamId = (await state()).team!.id;
-    await teammate.request.post("/api/games/register", { data: { alias: teammateAlias } });
+    await teammate.request.post("/api/games/register", { data: { alias: teammateAlias, name: "Browser Mate", phone: "9876543211" } });
     await state(teammate);
     expect((await action(teammate, { action: "team.join", teamId })).ok()).toBeTruthy();
-    await host.request.post("/api/games/register", { data: { alias: hostAlias } });
+    await host.request.post("/api/games/login", { data: { alias: hostAlias } });
     await state(host);
     expect((await host.request.get(`${path}/admin`)).status()).toBe(403);
     await hostPage.goto(`/games/${eventId}/admin`);
@@ -134,8 +145,8 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await page.reload();
     await page.getByRole("button", { name: /06 Verify your score/ }).click();
     await page.getByLabel("Hours logged").fill("1.5");
-    await page.getByLabel("I submitted my Benevity confirmation screenshot through the form.").check();
-    await page.getByRole("button", { name: "Confirm submission" }).click();
+    await page.getByLabel("Confirmation screenshot").setInputFiles({ name: "shot.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64") });
+    await page.getByRole("button", { name: "Submit screenshot" }).click();
     await expect.poll(async () => (await state()).verification?.status).toBe("SUBMITTED");
     expect((await state(teammate)).rounds[6].questions).toHaveLength(0);
     await answer(`${eventId}-r7-q0`, "key4_DemoOnlyToken00001_persons");
@@ -194,10 +205,8 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     expect(secondScores.hasMoreScores).toBeFalsy();
     expect(new Set([...firstScores.scores, ...secondScores.scores].map((entry) => entry.id)).size).toBe(await database.gameScore.count({ where: { eventId } }));
     await hostPage.reload();
-    await hostPage.getByRole("tab", { name: "Scores", exact: true }).click();
-    await hostPage.getByRole("button", { name: "Next score page", exact: true }).click();
-    await expect(hostPage.getByText("Page 2", { exact: true })).toBeVisible();
-    await expect(hostPage.getByRole("button", { name: "Next score page", exact: true })).toBeDisabled();
+    await expect(hostPage.getByRole("tab", { name: "Scores", exact: true })).toHaveCount(0);
+    await expect(hostPage.getByRole("tab", { name: "Participants", exact: true })).toHaveCount(0);
     expect(errors).toEqual([]);
   } finally { await Promise.all([player.close(), host.close(), teammate.close()]); }
 });

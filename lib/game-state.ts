@@ -8,7 +8,7 @@ export type Hint = { text: string; penaltyPct: number; order?: number };
 export async function getGameLeaderboard(eventId: string) {
   const [players, teams, totals, lastAnswers, verified] = await Promise.all([
     prisma.gameRegistration.findMany({ where: { eventId }, select: { alias: true, participant: { select: { name: true } } } }),
-    prisma.team.findMany({ where: { eventId }, include: { members: { orderBy: { joinedAt: "asc" }, select: { alias: true } }, progress: { orderBy: { unlockedAt: "asc" } } } }),
+    prisma.team.findMany({ where: { eventId }, include: { members: { orderBy: { joinedAt: "asc" }, select: { alias: true, participant: { select: { name: true } } } }, progress: { orderBy: { unlockedAt: "asc" } } } }),
     prisma.gameScore.groupBy({ by: ["alias", "teamId"], where: { eventId, voidedAt: null }, _sum: { points: true } }),
     prisma.gameScore.groupBy({ by: ["alias", "teamId"], where: { eventId, voidedAt: null, points: { gt: 0 }, roundId: { not: null } }, _max: { createdAt: true } }),
     prisma.scoreVerification.findMany({ where: { eventId, status: "APPROVED" }, select: { alias: true } }),
@@ -21,7 +21,7 @@ export async function getGameLeaderboard(eventId: string) {
   })).sort(compareRanks).map((entry, index) => ({ ...entry, rank: index + 1 }));
   const teamBoard = teams.map((team) => ({
     id: team.id, alias: team.name, name: team.name, captainAlias: team.captainAlias,
-    members: team.members.map((member) => ({ alias: member.alias, verified: approved.has(member.alias) })),
+    members: team.members.map((member) => ({ alias: member.alias, name: member.participant.name, verified: approved.has(member.alias) })),
     points: totals.filter((entry) => entry.teamId === team.id).reduce((sum, entry) => sum + (entry._sum.points ?? 0), 0),
     lastAnswer: lastAnswers.filter((entry) => entry.teamId === team.id).map((entry) => entry._max.createdAt?.toISOString() ?? "").sort().at(-1) || null,
     level: Math.min(5, team.progress.filter((entry) => entry.solvedAt).length + 1),
@@ -61,7 +61,7 @@ export async function getGameState(eventId: string, player: GameParticipant | nu
     if (hunt && round.openedAt && player) {
       if (!teamId) lockedReason = "Join a team to start the hunt";
       else if (!progress) lockedReason = "Solve the previous level first";
-      else if (round.requiresVerification && !isVerified) lockedReason = "Log your hours in Benevity and submit verification to unlock Level 4 and Level 5.";
+      else if (round.requiresVerification && !isVerified) lockedReason = "Log your hours in Benevity and upload the confirmation screenshot to unlock Level 4 and Level 5.";
     }
     const closed = (!!round.closedAt && round.closedAt <= now) || (hunt && !!event.huntDeadlineAt && event.huntDeadlineAt <= now);
     const state: "LOCKED" | "LIVE" | "DONE" | "CLOSED" = lockedReason ? "LOCKED" : done ? "DONE" : closed ? "CLOSED" : "LIVE";
@@ -97,7 +97,7 @@ export async function getGameState(eventId: string, player: GameParticipant | nu
     event: { id: event.id, title: event.title, company: event.company, location: event.location, eventDate: event.eventDate.toISOString(), givingUrl: event.givingUrl, verificationFormUrl: event.verificationFormUrl, teamsLocked: !!event.teamsLockedAt, huntDeadlineAt: event.huntDeadlineAt?.toISOString() ?? null },
     me: player ? { alias, name: player.name, isAdmin: player.isAdmin } : null,
     rounds, boards, team: boards.teams.find((team) => team.id === teamId) ?? null,
-    availablePlayers: boards.individual.filter((entry) => !inTeam.has(entry.alias)).map((entry) => entry.alias),
+    availablePlayers: boards.individual.filter((entry) => !inTeam.has(entry.alias)).map((entry) => ({ alias: entry.alias, name: entry.name })),
     verification: verification ? { status: verification.status, hours: Number(verification.hours), note: verification.note, rejectReason: verification.rejectReason } : null,
     pledge: pledge ? { name: pledge.name, email: pledge.email, phone: pledge.phone, mode: pledge.mode, city: pledge.city, availability: pledge.availability, hoursPerMonth: pledge.hoursPerMonth, interests: pledge.interests, other: pledge.other, consent: pledge.consent } : null,
   };

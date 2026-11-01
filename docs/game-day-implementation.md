@@ -4,7 +4,7 @@
 
 The website implements alias login, event teams, 17 data-driven sections, server-scored answers, shared hunt progression/hints, verification gating, separate leaderboards, celebrations, volunteering, and a PIN-protected host console. External hunt puzzles, downloadable puzzle files, SQL-injection simulations, and the private puzzle kit are outside this change.
 
-Verification uses the requirements' **Google Form fallback**. There is no R2 upload, screenshot thumbnail, or private screenshot-streaming endpoint. A player submits the screenshot externally, then confirms submission on the website. `SUBMITTED` unlocks that player's L4/L5 access; only host approval adds prize eligibility. This is intentionally a trust-based fallback, not proof that a file was uploaded.
+Verification is an on-site screenshot upload. Local development stores files in the ignored `.game-day/verifications` directory. Production uses the private R2 bucket `game-verifications` (binding `VERIFICATIONS`). `SUBMITTED` unlocks that player's L4/L5 access; only host approval adds prize eligibility. The host views the image in the console. The image URL is not public.
 
 This is locally verified, not production acceptance. The production URL, real content, production platform capacity, screenshot retention, and human rehearsal still need sign-off.
 
@@ -42,7 +42,7 @@ These are deliberately synthetic, public rehearsal fixtures, not the organizer's
 - Both picture rounds, in order: sun, tree, house, book, star, clock, heart, cloud, umbrella, flower.
 - Hunt: `key1_DemoOnlyToken00001_lets`, `key2_DemoOnlyToken00001_change`, `key3_DemoOnlyToken00001_one`, `key4_DemoOnlyToken00001_persons`, `key5_DemoOnlyToken00001_world`.
 
-Section 16 is titled Emoji Movie but uses drawing fixtures locally. Supply actual emoji/movie content before the event. Demo Benevity/Google Forms links are generic placeholders.
+Section 16 is titled Emoji Movie but uses drawing fixtures locally. Supply actual emoji/movie content before the event. The demo Benevity link is a generic placeholder.
 
 ## Database Deployment
 
@@ -114,11 +114,9 @@ The console supports round open/close/reopen/extend, paginated score awards and 
 
 ## Verification And Privacy
 
-Create a restricted Google Form that collects event ID, alias, Benevity hours, and screenshot; configure its upload access for the intended audience. Put the participant-facing form URL in `verificationFormUrl`. Hosts must separately retain the private response-folder URL; the website does not access Google responses automatically.
+Create the private bucket once before the first production deploy: `npx wrangler r2 bucket create game-verifications`. Local `next dev` does not use that bucket; it writes under `.game-day/verifications`. Players log hours in Benevity, then attach a JPG, PNG, or WEBP screenshot on the event page. The page shrinks the image before upload. Check the screenshot in the host console before approval. Rejection removes access to L4/L5 until the player uploads again, and does not erase already-earned team awards.
 
-Before opening the event, test the form with an actual participant account, including any organizational login requirements. Players confirm their external submission on the website. Check the matching screenshot in the restricted Google responses before approval. Rejection removes access to L4/L5 until resubmission but does not erase already-earned team awards.
-
-Assign an organizer to delete screenshots and copies from the Google Form response storage, exports, and trash after 30 days. This retention is manual for the fallback, not automated by the website. Restrict volunteer exports to authorized organizers and follow the collected contact consent. Never log screenshots/contact fields to Workers logs. No contact details are collected at alias login.
+Delete the R2 objects and the local `.game-day/verifications` folder about 30 days after the event. Restrict volunteer exports to authorized organizers and follow the collected contact consent. Never log screenshots or contact fields. No contact details are collected at alias login.
 
 ## Verification Commands
 
@@ -150,7 +148,7 @@ Verified locally:
 1. Replace demo media/answers/URLs; test the real external hunt separately. Confirm admin secrets and schema/functions are present in the target environment.
 2. Deploy to staging, verify Neon-over-HTTP runtime behavior and signed cookies, then complete all P0 acceptance checks on the actual production URL. No deployment was performed as part of this local implementation.
 3. Use Workers Paid for event week. Run an explicitly authorized 150-player production/staging load check and inspect Workers CPU/error telemetry. Local timings do not establish the <500 ms state / <800 ms answer targets or the Workers CPU budget. Concurrent answer latency is not measured by the polling harness.
-4. Complete the 6-10-person rehearsal with two teams, tune real hints/content, confirm the Google Form/privacy retention process, and verify event-day recovery with the host.
+4. Complete the 6-10-person rehearsal with two teams, tune real hints/content, confirm screenshot review and the 30-day deletion step, and verify event-day recovery with the host.
 5. Review dependency security before release. OpenNext warns that Next.js 14.2.35 is unsupported and uses the repository's existing unsupported-version override. Installation reported 42 dependency audit findings, including high/critical findings. Framework/dependency upgrades were not included in this feature change.
 
-Deferred: R2 uploads/private screenshot viewing, bulk approval, P2 leaderboard freeze/announcements/bonus games/volunteer sync. Teammates receive shared progress within a poll; the submitting player receives the animation. The level timer is in the sticky header rather than duplicated inside the team card. The provided diagram/media fixtures are for local rehearsal only.
+Deferred: bulk approval, P2 leaderboard freeze/announcements/bonus games/volunteer sync. Teammates receive shared progress within a poll; the submitting player receives the animation. The level timer is in the sticky header rather than duplicated inside the team card. The provided diagram/media fixtures are for local rehearsal only.

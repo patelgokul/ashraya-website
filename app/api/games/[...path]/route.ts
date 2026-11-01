@@ -72,16 +72,7 @@ export async function POST(request: NextRequest, { params }: Context) {
     if (resource !== "action") throw new GameError("Not found", 404);
     if (!await prisma.gameRegistration.findUnique({ where: { eventId_alias: { eventId, alias: player.alias } } })) throw new GameError("Open this event before playing");
     const action = playerActionSchema.parse(await body(request));
-    if (action.action === "verification") {
-      const event = await prisma.gameEvent.findUniqueOrThrow({ where: { id: eventId } });
-      if (!event.verificationFormUrl) throw new GameError("The organizer has not configured the verification form yet", 503);
-      const data = { hours: action.hours, note: action.note, status: "SUBMITTED" as const, rejectReason: null, reviewedBy: null, reviewedAt: null };
-      await prisma.$executeRaw`
-        INSERT INTO "ScoreVerification" (id, "eventId", alias, hours, note, status) VALUES (${crypto.randomUUID()}, ${eventId}, ${player.alias}, ${data.hours}, ${data.note ?? null}, 'SUBMITTED')
-        ON CONFLICT ("eventId", alias) DO UPDATE SET hours = EXCLUDED.hours, note = EXCLUDED.note, status = 'SUBMITTED', "rejectReason" = NULL, "reviewedBy" = NULL, "reviewedAt" = NULL
-        WHERE "ScoreVerification".status <> 'APPROVED'`;
-      return gameResponse({ ok: true });
-    }
+    if (action.action === "verification") throw new GameError("Attach the confirmation screenshot on the verification form");
     if (action.action === "answer") {
       const question = await prisma.gameQuestion.findUnique({ where: { id: action.questionId }, include: { round: true } });
       if (!question || question.round.eventId !== eventId) throw new GameError("Question not found", 404);

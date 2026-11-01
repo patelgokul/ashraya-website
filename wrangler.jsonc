@@ -14,6 +14,12 @@
       "service": "ashraya-website"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "VERIFICATIONS",
+      "bucket_name": "game-verifications"
+    }
+  ],
   "observability": {
     "enabled": true
   }

@@ -4,7 +4,7 @@ import { GameRegisterSchema } from "./game";
 const id = z.string().min(1).max(100);
 const alias = z.string().trim().toLowerCase().min(1).max(30);
 const name = z.string().trim().min(2).max(30);
-const reason = z.string().trim().min(3, "Please give a reason").max(500);
+const reason = z.string().trim().min(3).max(500).optional();
 export const hoursSchema = z.coerce.number().min(0.25).max(24).multipleOf(0.25);
 
 export const playerActionSchema = z.discriminatedUnion("action", [

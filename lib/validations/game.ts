@@ -4,12 +4,35 @@ export const MAX_POINTS_PER_ENTRY = 1000;
 
 const collapseSpaces = (value: string) => value.trim().replace(/\s+/g, " ");
 
+const aliasSchema = z
+  .string({ required_error: "Alias is required" })
+  .transform((value) => value.trim().toLowerCase())
+  .pipe(z.string().regex(/^[a-z0-9_-]{3,20}$/, "Use 3-20 letters, numbers, underscores or hyphens")
+    .refine((value) => !["admin", "host", "ashraya", "system"].includes(value), "This alias is reserved"));
+
+const nameSchema = z
+  .string({ required_error: "Name is required" })
+  .transform(collapseSpaces)
+  .pipe(z.string().min(2, "Name must be at least 2 characters").max(80, "Name must be 80 characters or fewer"));
+
+export function normalizeMobile(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  return digits;
+}
+
+const phoneSchema = z
+  .string({ required_error: "Mobile number is required" })
+  .transform(normalizeMobile)
+  .pipe(z.string().regex(/^[6-9]\d{9}$/, "Enter a 10-digit mobile number"));
+
+export const GameLoginSchema = z.object({ alias: aliasSchema });
+
 export const GameRegisterSchema = z.object({
-  alias: z
-    .string({ required_error: "Alias is required" })
-    .transform((value) => value.trim().toLowerCase())
-    .pipe(z.string().regex(/^[a-z0-9_-]{3,20}$/, "Use 3-20 letters, numbers, underscores or hyphens")
-      .refine((value) => !["admin", "host", "ashraya", "system"].includes(value), "This alias is reserved")),
+  alias: aliasSchema,
+  name: nameSchema,
+  phone: phoneSchema,
 });
 
 export const GAME_OPTIONS = [

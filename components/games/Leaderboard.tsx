@@ -47,7 +47,6 @@ export function Leaderboard({ entries, meAlias }: { entries: LeaderboardEntry[];
                       {entry.name} {isMe && <span className="text-xs font-normal text-blue-600">(you)</span>}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
-                      <span className="text-orange-600 font-medium">&ldquo;{entry.alias}&rdquo; · </span>
                       {entry.entries} {entry.entries === 1 ? "game" : "games"} played
                     </p>
                   </div>

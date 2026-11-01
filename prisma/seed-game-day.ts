@@ -43,7 +43,7 @@ async function main() {
     }
   }
   await database.gameEvent.create({ data: {
-    id: eventId, title: demo ? "Ashraya Game Day - Rehearsal" : content!.title, company: content?.company ?? "Ashraya",
+    id: eventId, title: demo ? "Ashraya Game Day - Rehearsal" : content!.title, company: demo ? "Microsoft" : content!.company,
     location: content?.location ?? "Online", eventDate: new Date("2026-11-04T00:00:00Z"), games: titles,
     givingUrl: content?.givingUrl ?? "https://benevity.com/", verificationFormUrl: content?.verificationFormUrl ?? "https://forms.google.com/",
   } });
@@ -60,7 +60,6 @@ async function main() {
       durationSec: kind === "SCRIBBLE" ? 180 : ["SONG", "RIDDLE"].includes(kind) ? 90 : null,
       maxAttempts: ["SONG", "RIDDLE", "SCRIBBLE"].includes(kind) ? 3 : null,
       requiresVerification: kind === "HUNT_LEVEL" && levelIndex >= 3, isFinal: kind === "HUNT_LEVEL" && levelIndex === 4,
-      openedAt: kind === "VERIFY" ? new Date() : null,
       description: kind === "HUNT_LEVEL" ? level?.card ?? `Rehearsal checkpoint ${levelIndex + 1}. The organizer's external puzzle link will appear here in the event.` : null,
     } });
     if (kind === "HUNT_LEVEL") {
@@ -83,8 +82,8 @@ async function main() {
   }
   if (demo) {
     await database.gameParticipant.upsert({ where: { alias: "rehearsal_host" }, create: { alias: "rehearsal_host", name: "Rehearsal Host", isAdmin: true }, update: {} });
-    for (const alias of ["maya_blr", "arjun_pune", "isha_delhi", "neel_mum"]) {
-      await database.gameParticipant.upsert({ where: { alias }, create: { alias, name: alias }, update: {} });
+    for (const [alias, name] of [["maya_blr", "Maya"], ["arjun_pune", "Arjun"], ["isha_delhi", "Isha"], ["neel_mum", "Neel"]] as const) {
+      await database.gameParticipant.upsert({ where: { alias }, create: { alias, name }, update: {} });
       await database.gameRegistration.createMany({ data: [{ eventId, alias }], skipDuplicates: true });
     }
     await database.$queryRaw`SELECT game_day_command(${eventId}, 'maya_blr', 'team.create', '{"name":"Team Udaan"}'::jsonb)`;
