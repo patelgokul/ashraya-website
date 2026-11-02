@@ -6,8 +6,15 @@ import type { RoundState } from "@/lib/game-state";
 import type { ActionResult } from "@/hooks/useGameState";
 import { gameButton, gameInput } from "./GamePanels";
 
+function withLinks(text: string) {
+  return text.replace(/(?<!\]\()https?:\/\/[^\s<>)\]]+/g, (url) => {
+    const core = url.replace(/[.,;:!?]+$/g, "");
+    return `[${core}](${core})${url.slice(core.length)}`;
+  });
+}
+
 export function GameText({ children }: { children: string }) {
-  return <div className="space-y-3 break-words text-sm leading-relaxed text-gray-700 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline [&_code]:break-all [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_li]:ml-5 [&_li]:list-disc [&_p]:whitespace-pre-wrap"><ReactMarkdown components={{ a: ({ children: label, href }) => <a href={href} target="_blank" rel="noopener noreferrer">{label}</a> }}>{children}</ReactMarkdown></div>;
+  return <div className="space-y-3 break-words text-sm leading-relaxed text-gray-700 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline [&_code]:break-all [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_li]:ml-5 [&_li]:list-disc [&_p]:whitespace-pre-wrap"><ReactMarkdown components={{ a: ({ children: label, href }) => <a href={href} target="_blank" rel="noopener noreferrer">{label}</a> }}>{withLinks(children)}</ReactMarkdown></div>;
 }
 
 function AnswerInput({ round, question, now, act, onCorrect }: {
@@ -31,7 +38,7 @@ function AnswerInput({ round, question, now, act, onCorrect }: {
     } catch (failure) { setError((failure as Error).message); } finally { inFlight.current = false; setBusy(false); }
   }} className="space-y-2">
     <label htmlFor={`answer-${question.id}`} className="block text-sm font-medium text-gray-800">{question.prompt ?? "Your answer"}</label>
-    <div className={`flex gap-2 ${error ? "game-answer-shake" : ""}`}><input id={`answer-${question.id}`} autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={300} disabled={disabled} value={answer} onChange={(event) => { setAnswer(event.target.value); setError(""); }} className={gameInput} aria-describedby={`feedback-${question.id}`} /><button type="submit" title="Submit answer" aria-label="Submit answer" disabled={disabled || !answer.trim()} className={`${gameButton} shrink-0 !px-3`}><ArrowRight className="h-5 w-5" /></button></div>
+    <div className={`flex gap-2 ${error ? "game-answer-shake" : ""}`}><input id={`answer-${question.id}`} autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={300} disabled={disabled} placeholder={round.kind === "HUNT_LEVEL" ? `key${[3, 4, 5, 7, 8].indexOf(round.order) + 1}_xxxxxxxxxxxx_xxxxx` : undefined} value={answer} onChange={(event) => { setAnswer(event.target.value); setError(""); }} className={gameInput} aria-describedby={`feedback-${question.id}`} /><button type="submit" title="Submit answer" aria-label="Submit answer" disabled={disabled || !answer.trim()} className={`${gameButton} shrink-0 !px-3`}><ArrowRight className="h-5 w-5" /></button></div>
     <p id={`feedback-${question.id}`} aria-live="polite" className={`min-h-5 text-xs ${error ? "text-red-700" : "text-gray-500"}`}>{error || (expired || round.state === "CLOSED" ? "Round closed" : busy ? "Checking answer..." : question.attemptsLeft !== null ? `${question.attemptsLeft} attempts left` : "")}</p>
     {question.revealedAnswer && <p className="text-sm font-semibold text-gray-700">Answer: {question.revealedAnswer}</p>}
   </form>;

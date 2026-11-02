@@ -30,7 +30,11 @@ test("server scoring examples and hint floors", () => {
 test("hunt random part stays case sensitive", () => {
   const key = "key1_RandomSecret12345_Let's";
   assert.ok(matchHuntKey(' "KEY1_RandomSecret12345_lets" ', key));
+  assert.ok(matchHuntKey("key1_RandomSecret12345_Let", key));
+  assert.ok(matchHuntKey("KEY1_RandomSecret12345_let's", key));
+  assert.ok(matchHuntKey("key4_RandomSecret12345_Person", "key4_RandomSecret12345_Person's"));
   assert.ok(!matchHuntKey("key1_randomSecret12345_lets", key));
+  assert.ok(!matchHuntKey("key1_RandomSecret12345_Le", key));
   assert.ok(!matchHuntKey("key2_RandomSecret12345_lets", key));
 });
 
