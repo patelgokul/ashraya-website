@@ -8,7 +8,7 @@ export const GiveHamperSchema = z.object({
   officeLocation: z.enum(OFFICE_LOCATION_IDS, { errorMap: () => ({ message: "Select your office location" }) }),
   hoursTracked: z.coerce
     .number({ invalid_type_error: "Enter the hours you have tracked" })
-    .min(0, "Hours can't be negative")
+    .gt(0, "Hours must be greater than zero")
     .max(MAX_HAMPER_HOURS, `Hours can't exceed ${MAX_HAMPER_HOURS}`)
     .multipleOf(0.25, "Use quarter hours, like 1.5 or 2.25"),
   phone: GameRegisterSchema.shape.phone.optional(),
