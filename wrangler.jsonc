@@ -25,5 +25,22 @@
   },
   "limits": {
     "cpu_ms": 300000
+  },
+  "env": {
+    "qa": {
+      "name": "ashraya-website-qa",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "ashraya-website-qa"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "VERIFICATIONS",
+          "bucket_name": "game-verifications-qa"
+        }
+      ]
+    }
   }
 }

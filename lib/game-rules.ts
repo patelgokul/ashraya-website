@@ -27,12 +27,21 @@ export function matchAnswer(input: string, accepted: string[], threshold = 0.85)
   return { similarity, correct: similarity >= threshold, closeCall: similarity >= 0.65 && similarity < threshold };
 }
 
+function huntWordForms(word: string) {
+  const lower = word.toLowerCase();
+  const forms = new Set([lower.replace(/['\u2018\u2019]/g, "")]);
+  // Double-click stops at the apostrophe, so "Let's" is copied as "Let" and "Person's" as "Person".
+  if (/['\u2018\u2019]s$/i.test(lower)) forms.add(lower.slice(0, -2));
+  return forms;
+}
+
 export function matchHuntKey(input: string, expected: string) {
-  const wordForm = (word: string) => word.toLowerCase().replace(/['\u2018\u2019]/g, "");
   const given = input.trim().replace(/^["'`]+|["'`]+$/g, "").split("_");
   const parts = expected.split("_");
-  return given.length === 3 && parts.length === 3 && given[0].toLowerCase() === parts[0].toLowerCase()
-    && given[1] === parts[1] && wordForm(given[2]) === wordForm(parts[2]);
+  if (given.length !== 3 || parts.length !== 3) return false;
+  const submitted = huntWordForms(given[2]);
+  return given[0].toLowerCase() === parts[0].toLowerCase() && given[1] === parts[1]
+    && [...huntWordForms(parts[2])].some((form) => submitted.has(form));
 }
 
 export function scoreAnswer({ elapsedSec, maxPoints = 1000, graceSec = 3, halfLifeSec = 20, floorPct = 30, penaltyPct = 0 }: {

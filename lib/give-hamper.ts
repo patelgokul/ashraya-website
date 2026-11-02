@@ -28,7 +28,6 @@ export const GIVE_HAMPER = {
     "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D",
   ),
   kitImage: "/images/give-hamper/diwali-kit.png",
-  kitPdf: env(process.env.NEXT_PUBLIC_GIVE_HAMPER_KIT_PDF, "/images/give-hamper/diwali-kit.pdf"),
 };
 
 export const TREASURE_HUNT = {
@@ -41,13 +40,27 @@ export function officeById(id: string) {
   return OFFICE_LOCATIONS.find((office) => office.id === id) ?? null;
 }
 
+// Hamper days follow India time, matching where the offices are.
+export function kolkataToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+}
+
 export type GiveHamperState = {
-  me: { alias: string; name: string; phone: string | null } | null;
+  me: { alias: string; name: string; phone: string | null; officeLocation: OfficeLocationId | null } | null;
   hamper: {
-    officeLocation: OfficeLocationId;
     hoursTracked: number;
     acceptedAt: string;
     updatedAt: string;
     treasureHuntAt: string | null;
   } | null;
+  lastHamper: { hoursTracked: number; hamperDate: string } | null;
+};
+
+export type HamperAdminRow = {
+  id: string | null;
+  alias: string;
+  name: string;
+  entryDate: string;
+  officeLocation: OfficeLocationId | null;
+  hoursTracked: number | null;
 };

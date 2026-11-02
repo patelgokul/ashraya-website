@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
   }
 
-  const { alias, name, phone } = result.data;
+  const { alias, name, phone, officeLocation } = result.data;
   const existing = await prisma.gameParticipant.findUnique({ where: { alias }, select: { alias: true } });
   if (existing) {
     return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   // A plain insert: Neon's HTTP connection on Workers can't run upsert's transaction.
   const participant = await prisma.gameParticipant
-    .create({ data: { alias, name, phone }, select: { alias: true, name: true } })
+    .create({ data: { alias, name, phone, officeLocation }, select: { alias: true, name: true } })
     .catch((error: unknown) => {
       if ((error as { code?: string }).code === "P2002") return null;
       throw error;
