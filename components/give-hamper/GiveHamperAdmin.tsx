@@ -212,7 +212,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
         ))}
       </ul>
 
-      {!!pageRows.length && <div className="hidden overflow-hidden rounded-2xl border border-gray-100 bg-white md:block">
+      {!!pageRows.length && <div className="hidden overflow-x-auto rounded-2xl border border-gray-100 bg-white md:block">
         <table className="w-full">
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
@@ -230,7 +230,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{formatDate(row.entryDate)}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{officeLabel(row) ?? <span className="text-gray-400">—</span>}</td>
-                <td className="px-4 py-3"><HoursCell row={row} onSaved={onSaved} /></td>
+                <td className="whitespace-nowrap px-4 py-3"><HoursCell row={row} onSaved={onSaved} /></td>
               </tr>
             ))}
           </tbody>
@@ -293,8 +293,8 @@ function HoursCell({ row, onSaved }: { row: HamperAdminRow; onSaved: (row: Hampe
     <form onSubmit={save}>
       <div className="flex items-center gap-2">
         <input aria-label={`Hours for ${row.name}`} type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25}
-          value={hours} onChange={(event) => setHours(event.target.value)} placeholder="—" className={`${inputClass} w-24 min-w-0 flex-1 px-3 py-2.5 sm:flex-none`} />
-        <button disabled={busy || hours.trim() === "" || hours === saved} className={`${buttonClass} min-h-11 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
+          value={hours} onChange={(event) => setHours(event.target.value)} placeholder="—" className={`${inputClass} w-full min-w-0 flex-1 px-3 py-2.5 md:w-24 md:flex-none md:shrink-0`} />
+        <button disabled={busy || hours.trim() === "" || hours === saved} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
       </div>
       {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
     </form>

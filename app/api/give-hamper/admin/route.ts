@@ -23,14 +23,18 @@ type ParticipantRow = {
 };
 
 function toRows(participant: ParticipantRow): HamperAdminRow[] {
-  const shared = { alias: participant.alias, name: participant.name, officeLocation: participant.officeLocation as OfficeLocationId | null };
+  const shared = {
+    alias: participant.alias,
+    name: participant.name,
+    officeLocation: participant.officeLocation as OfficeLocationId | null,
+    entryDate: new Date(participant.createdAt).toISOString(),
+  };
   if (!participant.giveHampers.length) {
-    return [{ ...shared, id: null, entryDate: new Date(participant.createdAt).toISOString(), hoursTracked: null }];
+    return [{ ...shared, id: null, hoursTracked: null }];
   }
   return participant.giveHampers.map((hamper) => ({
     ...shared,
     id: hamper.id,
-    entryDate: new Date(hamper.hamperDate).toISOString(),
     hoursTracked: Number(hamper.hoursTracked),
   }));
 }
@@ -45,8 +49,7 @@ export async function GET() {
     const gate = await adminGate();
     if ("denied" in gate) return gate.denied;
     const participants = await prisma.gameParticipant.findMany({ orderBy: { createdAt: "desc" }, select: rowSelect });
-    const rows = participants.flatMap(toRows).sort((left, right) => right.entryDate.localeCompare(left.entryDate));
-    return gameResponse({ rows });
+    return gameResponse({ rows: participants.flatMap(toRows) });
   });
 }
 
@@ -77,7 +80,10 @@ export async function PUT(req: NextRequest) {
 
     const participant = await prisma.gameParticipant.findUnique({ where: { alias: data.alias }, select: rowSelect });
     const rows = toRows(participant!);
-    const row = data.id ? rows.find((entry) => entry.id === data.id) : rows.find((entry) => entry.entryDate.slice(0, 10) === kolkataToday());
+    const today = kolkataToday();
+    const row = data.id
+      ? rows.find((entry) => entry.id === data.id)
+      : rows.find((entry) => participant!.giveHampers.some((hamper) => hamper.id === entry.id && new Date(hamper.hamperDate).toISOString().slice(0, 10) === today));
     return gameResponse({ row });
   });
 }
