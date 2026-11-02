@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GiveHamperAdmin } from "@/components/give-hamper/GiveHamperAdmin";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Give Hampers Admin", robots: { index: false, follow: false } };
 
 export default function GiveHamperAdminPage() {
