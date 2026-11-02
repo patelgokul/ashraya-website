@@ -19,18 +19,18 @@ export async function POST(req: NextRequest, { params }: { params: { eventId: st
       return NextResponse.json(await gameCommand(params.eventId, admin.alias, action.action, action));
     }
     const player = await requirePlayer();
-    try {
-      await prisma.gameRegistration.create({ data: { eventId: event.id, alias: player.alias } });
-    } catch (error) {
-      if ((error as { code?: string }).code !== "P2002") throw error;
-    }
     const scoreInput = GameScoreSchema.safeParse(body);
     if (!scoreInput.success) throw new GameError(scoreInput.error.issues[0]?.message ?? "Invalid score");
     if (!event.games.includes(scoreInput.data.game)) throw new GameError("Please select a game from this event");
-    const score = await prisma.gameScore.create({
-      data: { alias: player.alias, eventId: event.id, game: scoreInput.data.game, points: scoreInput.data.points },
-      select: { id: true },
-    });
-    return NextResponse.json(score, { status: 201 });
+    // Single statements. Prisma create opens a transaction, which the Neon HTTP driver on Cloudflare rejects.
+    await prisma.$executeRaw`
+      INSERT INTO "GameRegistration" ("eventId", alias)
+      VALUES (${event.id}, ${player.alias})
+      ON CONFLICT ("eventId", alias) DO NOTHING`;
+    const inserted = await prisma.$queryRaw<{ id: string }[]>`
+      INSERT INTO "GameScore" (id, alias, "eventId", game, points)
+      VALUES (${crypto.randomUUID()}, ${player.alias}, ${event.id}, ${scoreInput.data.game}, ${scoreInput.data.points})
+      RETURNING id`;
+    return NextResponse.json({ id: inserted[0].id }, { status: 201 });
   });
 }
