@@ -5,7 +5,7 @@ export type HamperCity = "NOIDA" | "BENGALURU" | "HYDERABAD";
 export const OFFICE_LOCATIONS = [
   { id: "noida-kp-towers", label: "Noida – KP Towers", city: "NOIDA" },
   { id: "noida-sovereign", label: "Noida – Sovereign Building", city: "NOIDA" },
-  { id: "bengaluru-ferns-prestige", label: "Bengaluru – Ferns Prestige (Ferns Galaxy)", city: "BENGALURU" },
+  { id: "bengaluru-ferns-prestige", label: "Bengaluru – Prestige Ferns Galaxy", city: "BENGALURU" },
   { id: "bengaluru-luxur", label: "Bengaluru – Luxur", city: "BENGALURU" },
   { id: "hyderabad-main-campus", label: "Hyderabad – Microsoft Main Campus", city: "HYDERABAD" },
   { id: "hyderabad-phoenix", label: "Hyderabad – Phoenix Building", city: "HYDERABAD" },
@@ -27,8 +27,8 @@ export const GIVE_HAMPER = {
     process.env.NEXT_PUBLIC_BENEVITY_TIME_URL,
     "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D",
   ),
-  kitImage: "/images/give-hamper/kit-cover.svg",
-  kitPdf: env(process.env.NEXT_PUBLIC_GIVE_HAMPER_KIT_PDF, ""),
+  kitImage: "/images/give-hamper/diwali-kit.png",
+  kitPdf: env(process.env.NEXT_PUBLIC_GIVE_HAMPER_KIT_PDF, "/images/give-hamper/diwali-kit.pdf"),
 };
 
 export const TREASURE_HUNT = {

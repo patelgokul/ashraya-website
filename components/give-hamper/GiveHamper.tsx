@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Clock3, ExternalLink, FileText, Gift, LogOut, MapPin } from "lucide-react";
+import { CalendarRange, CheckCircle2, Clock3, ExternalLink, Gift, LogOut, MapPin, Paintbrush } from "lucide-react";
 import { useGiveHamper } from "@/hooks/useGiveHamper";
 import { GIVE_HAMPER, OFFICE_LOCATIONS, type GiveHamperState } from "@/lib/give-hamper";
 import { GiveHamperSchema, MAX_HAMPER_HOURS } from "@/lib/validations/give-hamper";
@@ -30,41 +30,64 @@ export function GiveHamper() {
     );
   }
 
+  if (!state.me) {
+    return (
+      <div role="dialog" aria-modal="true" aria-label="Your Give Hamper" className="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/70 px-4 py-8">
+        <div className="mx-auto max-w-2xl space-y-6">
+          <KitStory />
+          <RegisterCard company="Microsoft" intro={REGISTER_INTRO} onRegistered={refresh} />
+          <p className="pb-6 text-center">
+            <Link href="/" className="text-sm font-semibold text-white/90 underline-offset-4 hover:underline">Back to home</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className={state.me ? "" : "pointer-events-none select-none blur-sm"} aria-hidden={!state.me}>
-        <KitPreview />
-        {state.me ? <AcceptanceForm state={state} onLoggedOut={refresh} /> : <div className="mt-6 h-96 rounded-2xl border border-gray-100 bg-white" />}
-      </div>
-
-      {!state.me && (
-        <div role="dialog" aria-modal="true" aria-label="Register to accept your Give Hamper" className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-slate-900/60 px-4 py-10 backdrop-blur-sm sm:items-center">
-          <div className="w-full max-w-md">
-            <RegisterCard company="Microsoft" intro={REGISTER_INTRO} onRegistered={refresh} />
-            <p className="mt-4 text-center">
-              <Link href="/" className="text-sm font-semibold text-white/90 underline-offset-4 hover:underline">Back to home</Link>
-            </p>
-          </div>
-        </div>
-      )}
+      <KitStory />
+      <AcceptanceForm state={state} onLoggedOut={refresh} />
     </>
   );
 }
 
-function KitPreview() {
-  const image = (
-    <img src={GIVE_HAMPER.kitImage} alt="ĀSHRAYA × Microsoft Diwali Volunteering Kit" className="w-full rounded-xl border border-gray-100 object-cover" />
-  );
+function KitStory() {
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
-      {GIVE_HAMPER.kitPdf ? (
-        <a href={GIVE_HAMPER.kitPdf} target="_blank" rel="noreferrer" className="block">
-          {image}
-          <span className="mt-3 inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-blue-700">
-            <FileText className="h-4 w-4" />View the full kit (PDF)<ExternalLink className="h-3.5 w-3.5" />
-          </span>
-        </a>
-      ) : image}
+    <section className="space-y-4">
+      <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-orange-600">Your little kit. A big difference.</p>
+        <h2 className="mt-1 font-display text-2xl font-bold text-gray-900">This hamper is a gift you make</h2>
+        <p className="mt-3 text-sm leading-relaxed text-gray-700">
+          Inside is a Diwali volunteering kit. You paint and decorate each piece, and ĀSHRAYA shares your finished creations with children and communities. Your creativity and the time you give are what bring the smiles.
+        </p>
+        <p className="mt-2 text-sm font-semibold text-gray-900">Create with love, give with joy.</p>
+      </div>
+
+      <a href={GIVE_HAMPER.kitPdf} target="_blank" rel="noreferrer" className="block rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
+        <img src={GIVE_HAMPER.kitImage} alt="ĀSHRAYA × Microsoft Diwali volunteering kit card, with the contents, painting steps, and collection dates" className="w-full rounded-xl" />
+        <span className="mt-3 inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-blue-700">
+          Open the kit card <ExternalLink className="h-3.5 w-3.5" />
+        </span>
+      </a>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <article className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <Paintbrush className="h-5 w-5 text-orange-500" />
+          <h3 className="mt-2 text-sm font-bold text-gray-900">What you receive</h3>
+          <p className="mt-1 text-sm leading-relaxed text-gray-600">Terracotta diyas and a gullak, plus a canvas, key chain, Diwali card, bag, paints, and brushes.</p>
+        </article>
+        <article className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <Clock3 className="h-5 w-5 text-blue-700" />
+          <h3 className="mt-2 text-sm font-bold text-gray-900">How to prepare</h3>
+          <p className="mt-1 text-sm leading-relaxed text-gray-600">Soak the diyas and gullak for 30 minutes, then dry them for about 6 hours before painting. Paint the other pieces directly.</p>
+        </article>
+        <article className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <CalendarRange className="h-5 w-5 text-emerald-700" />
+          <h3 className="mt-2 text-sm font-bold text-gray-900">Bring them back</h3>
+          <p className="mt-1 text-sm leading-relaxed text-gray-600">Collection drive: Wednesday 4 November to Friday 6 November 2026, at your ĀSHRAYA collection point.</p>
+        </article>
+      </div>
     </section>
   );
 }
@@ -154,7 +177,7 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
 
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="flex items-center gap-2 font-display text-xl font-bold text-gray-900"><Clock3 className="h-5 w-5 text-blue-700" />Track your time</h2>
-        <p className="mt-1 text-sm text-gray-600">Log the time you spend on the hamper activities in Benevity, then enter your total hours here.</p>
+        <p className="mt-1 text-sm text-gray-600">Soaking, drying, and painting all count. Log that volunteering time in Benevity, then enter your total hours here.</p>
 
         <a href={GIVE_HAMPER.benevityTimeUrl} target="_blank" rel="noreferrer"
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3.5 text-sm font-bold text-white transition-colors hover:bg-blue-800">
@@ -166,7 +189,7 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
 
         <div className="mt-3">
           <label htmlFor="hamper-hours" className="mb-1.5 block text-sm font-medium text-gray-700">How many volunteering hours have you tracked?</label>
-          <input id="hamper-hours" type="number" inputMode="decimal" min={0} max={MAX_HAMPER_HOURS} step={0.25} value={hours} onChange={(event) => setHours(event.target.value)} placeholder="e.g. 2.5" className={inputClass} />
+          <input id="hamper-hours" type="number" inputMode="decimal" min={0} max={MAX_HAMPER_HOURS} step={0.25} value={hours} onChange={(event) => setHours(event.target.value)} placeholder="e.g. 15" className={inputClass} />
           {fieldErrors.hoursTracked && <p className="mt-1 text-xs text-red-500">{fieldErrors.hoursTracked}</p>}
           <p className="mt-1.5 text-xs text-gray-500">You can come back later with your alias to update this.</p>
         </div>
