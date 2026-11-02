@@ -13,3 +13,11 @@ CREATE TABLE IF NOT EXISTS "GiveHamper" (
 );
 
 ALTER TABLE "GiveHamper" ADD COLUMN IF NOT EXISTS "treasureHuntAt" TIMESTAMP(3);
+
+-- The office now belongs to the participant. "GiveHamper"."officeLocation" stays (nullable) until
+-- every deployed Worker reads the participant column, because older Workers still write it.
+ALTER TABLE "GameParticipant" ADD COLUMN IF NOT EXISTS "officeLocation" TEXT;
+UPDATE "GameParticipant" AS participant SET "officeLocation" = hamper."officeLocation"
+FROM "GiveHamper" AS hamper
+WHERE hamper.alias = participant.alias AND participant."officeLocation" IS NULL AND hamper."officeLocation" IS NOT NULL;
+ALTER TABLE "GiveHamper" ALTER COLUMN "officeLocation" DROP NOT NULL;

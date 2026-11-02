@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarRange, CheckCircle2, Clock3, ExternalLink, Gift, LogOut, MapPin, Paintbrush } from "lucide-react";
 import { useGiveHamper } from "@/hooks/useGiveHamper";
-import { GIVE_HAMPER, OFFICE_LOCATIONS, type GiveHamperState } from "@/lib/give-hamper";
+import { GIVE_HAMPER, OFFICE_LOCATIONS, officeById, type GiveHamperState } from "@/lib/give-hamper";
 import { GiveHamperSchema, MAX_HAMPER_HOURS } from "@/lib/validations/give-hamper";
 import { RegisterCard } from "@/components/games/RegisterCard";
 import { CopyLink } from "./CopyLink";
@@ -35,7 +35,7 @@ export function GiveHamper() {
       <div role="dialog" aria-modal="true" aria-label="Your Give Hamper" className="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/70 px-4 py-8">
         <div className="mx-auto max-w-2xl space-y-6">
           <KitStory brief />
-          <RegisterCard company="Microsoft" intro={REGISTER_INTRO} onRegistered={refresh} />
+          <RegisterCard company="Microsoft" intro={REGISTER_INTRO} onRegistered={refresh} askOffice />
           <p className="pb-6 text-center">
             <Link href="/" className="text-sm font-semibold text-white/90 underline-offset-4 hover:underline">Back to home</Link>
           </p>
@@ -98,7 +98,8 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
   const router = useRouter();
   const me = state.me!;
   const hamper = state.hamper;
-  const [officeLocation, setOfficeLocation] = useState<string>(hamper?.officeLocation ?? "");
+  const [officeLocation, setOfficeLocation] = useState("");
+  const savedOffice = me.officeLocation ? officeById(me.officeLocation) : null;
   const [hours, setHours] = useState(hamper ? String(hamper.hoursTracked) : "");
   const [phone, setPhone] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -112,7 +113,11 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
     event.preventDefault();
     if (busy) return;
     setServerError("");
-    const parsed = GiveHamperSchema.safeParse({ officeLocation, hoursTracked: hours, phone: me.phone ? undefined : phone });
+    const parsed = GiveHamperSchema.safeParse({
+      officeLocation: savedOffice ? undefined : officeLocation,
+      hoursTracked: hours,
+      phone: me.phone ? undefined : phone,
+    });
     if (!parsed.success) {
       setFieldErrors(Object.fromEntries(parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message])));
       return;
@@ -153,6 +158,7 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
           <div className="min-w-0">
             <h2 className="font-display text-xl font-bold text-gray-900">Your details</h2>
             <p className="mt-1 break-words text-sm text-gray-600">{me.name} · <span className="font-mono">{me.alias}</span>{me.phone && ` · ${me.phone}`}</p>
+            {savedOffice && <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-600"><MapPin className="h-4 w-4 shrink-0 text-blue-700" />{savedOffice.label}</p>}
           </div>
           <button type="button" onClick={logOut} className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-900">
             <LogOut className="h-3.5 w-3.5" />Not you?
@@ -167,14 +173,16 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
           </div>
         )}
 
-        <div className="mt-5">
-          <label htmlFor="hamper-office" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700"><MapPin className="h-4 w-4 text-blue-700" />Office location</label>
-          <select id="hamper-office" value={officeLocation} onChange={(event) => setOfficeLocation(event.target.value)} className={inputClass}>
-            <option value="" disabled>Select your office</option>
-            {OFFICE_LOCATIONS.map((office) => <option key={office.id} value={office.id}>{office.label}</option>)}
-          </select>
-          {fieldErrors.officeLocation && <p className="mt-1 text-xs text-red-500">{fieldErrors.officeLocation}</p>}
-        </div>
+        {!savedOffice && (
+          <div className="mt-5">
+            <label htmlFor="hamper-office" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700"><MapPin className="h-4 w-4 text-blue-700" />Office location</label>
+            <select id="hamper-office" value={officeLocation} onChange={(event) => setOfficeLocation(event.target.value)} className={inputClass}>
+              <option value="" disabled>Select your office</option>
+              {OFFICE_LOCATIONS.map((office) => <option key={office.id} value={office.id}>{office.label}</option>)}
+            </select>
+            {fieldErrors.officeLocation && <p className="mt-1 text-xs text-red-500">{fieldErrors.officeLocation}</p>}
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">

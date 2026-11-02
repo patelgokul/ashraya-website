@@ -7,13 +7,14 @@ import type { GiveHamperState, OfficeLocationId } from "@/lib/give-hamper";
 
 export const dynamic = "force-dynamic";
 
-async function hamperState(player: { alias: string; name: string; phone: string | null } | null): Promise<GiveHamperState> {
+type Player = { alias: string; name: string; phone: string | null; officeLocation: string | null };
+
+async function hamperState(player: Player | null): Promise<GiveHamperState> {
   if (!player) return { me: null, hamper: null };
   const hamper = await prisma.giveHamper.findUnique({ where: { alias: player.alias } });
   return {
-    me: { alias: player.alias, name: player.name, phone: player.phone },
+    me: { alias: player.alias, name: player.name, phone: player.phone, officeLocation: player.officeLocation as OfficeLocationId | null },
     hamper: hamper && {
-      officeLocation: hamper.officeLocation as OfficeLocationId,
       hoursTracked: Number(hamper.hoursTracked),
       acceptedAt: new Date(hamper.acceptedAt).toISOString(),
       updatedAt: new Date(hamper.updatedAt).toISOString(),
@@ -32,20 +33,22 @@ export async function PUT(req: NextRequest) {
     const player = await requirePlayer();
     const data = GiveHamperSchema.parse(await req.json().catch(() => null));
     if (!player.phone && !data.phone) throw new GameError("Add your mobile number");
-    if (data.phone && data.phone !== player.phone) {
-      await prisma.gameParticipant.update({ where: { alias: player.alias }, data: { phone: data.phone } });
+    const phone = data.phone ?? player.phone;
+    const officeLocation = data.officeLocation ?? player.officeLocation;
+    if (!officeLocation) throw new GameError("Select your office location");
+    if (phone !== player.phone || officeLocation !== player.officeLocation) {
+      await prisma.gameParticipant.update({ where: { alias: player.alias }, data: { phone, officeLocation } });
     }
 
     // One statement, so a double tap or a second device can never create a duplicate row.
     await prisma.$executeRaw`
-      INSERT INTO "GiveHamper" (alias, "officeLocation", "hoursTracked", "acceptedAt", "updatedAt")
-      VALUES (${player.alias}, ${data.officeLocation}, ${data.hoursTracked}::numeric, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
+      INSERT INTO "GiveHamper" (alias, "hoursTracked", "acceptedAt", "updatedAt")
+      VALUES (${player.alias}, ${data.hoursTracked}::numeric, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
       ON CONFLICT (alias) DO UPDATE SET
-        "officeLocation" = EXCLUDED."officeLocation",
         "hoursTracked" = EXCLUDED."hoursTracked",
         "updatedAt" = EXCLUDED."updatedAt"`;
 
-    return gameResponse(await hamperState({ ...player, phone: data.phone ?? player.phone }));
+    return gameResponse(await hamperState({ ...player, phone, officeLocation }));
   });
 }
 

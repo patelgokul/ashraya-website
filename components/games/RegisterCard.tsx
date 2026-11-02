@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { GameLoginSchema, GameRegisterSchema } from "@/lib/validations/game";
+import { GameLoginSchema, GameRegisterSchema, OfficeRegisterSchema } from "@/lib/validations/game";
+import { OFFICE_LOCATIONS } from "@/lib/give-hamper";
 
 const inputClass =
   "w-full border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors";
@@ -10,13 +11,16 @@ type RegisterCardProps = {
   company: string;
   onRegistered: () => Promise<void>;
   intro?: { register: string; login: string };
+  askOffice?: boolean;
+  initialMode?: "register" | "login";
 };
 
-export function RegisterCard({ company, onRegistered, intro }: RegisterCardProps) {
-  const [mode, setMode] = useState<"register" | "login">("register");
+export function RegisterCard({ company, onRegistered, intro, askOffice = false, initialMode = "register" }: RegisterCardProps) {
+  const [mode, setMode] = useState<"register" | "login">(initialMode);
   const [alias, setAlias] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [officeLocation, setOfficeLocation] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -26,9 +30,11 @@ export function RegisterCard({ company, onRegistered, intro }: RegisterCardProps
     event.preventDefault();
     if (busy) return;
     setServerError(null);
-    const parsed = registering
-      ? GameRegisterSchema.safeParse({ alias, name, phone })
-      : GameLoginSchema.safeParse({ alias });
+    const parsed = !registering
+      ? GameLoginSchema.safeParse({ alias })
+      : askOffice
+      ? OfficeRegisterSchema.safeParse({ alias, name, phone, officeLocation })
+      : GameRegisterSchema.safeParse({ alias, name, phone });
     if (!parsed.success) {
       const errors: Record<string, string> = {};
       for (const issue of parsed.error.issues) errors[String(issue.path[0] ?? "form")] = issue.message;
@@ -102,6 +108,16 @@ export function RegisterCard({ company, onRegistered, intro }: RegisterCardProps
                 <input id="game-phone" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="10-digit mobile number" inputMode="numeric" autoComplete="tel" required className={inputClass} />
                 {fieldErrors.phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>}
               </div>
+              {askOffice && (
+                <div>
+                  <label htmlFor="game-office" className="block text-sm font-medium text-gray-700 mb-1.5">Office location</label>
+                  <select id="game-office" value={officeLocation} onChange={(event) => setOfficeLocation(event.target.value)} required className={`${inputClass} bg-white`}>
+                    <option value="" disabled>Select your office</option>
+                    {OFFICE_LOCATIONS.map((office) => <option key={office.id} value={office.id}>{office.label}</option>)}
+                  </select>
+                  {fieldErrors.officeLocation && <p className="text-red-500 text-xs mt-1">{fieldErrors.officeLocation}</p>}
+                </div>
+              )}
             </>
           )}
 

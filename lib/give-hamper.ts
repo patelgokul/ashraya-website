@@ -42,12 +42,19 @@ export function officeById(id: string) {
 }
 
 export type GiveHamperState = {
-  me: { alias: string; name: string; phone: string | null } | null;
+  me: { alias: string; name: string; phone: string | null; officeLocation: OfficeLocationId | null } | null;
   hamper: {
-    officeLocation: OfficeLocationId;
     hoursTracked: number;
     acceptedAt: string;
     updatedAt: string;
     treasureHuntAt: string | null;
   } | null;
+};
+
+export type HamperAdminRow = {
+  alias: string;
+  name: string;
+  registeredAt: string;
+  officeLocation: OfficeLocationId | null;
+  hoursTracked: number | null;
 };

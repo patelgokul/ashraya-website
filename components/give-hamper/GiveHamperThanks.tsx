@@ -24,7 +24,7 @@ export function GiveHamperThanks() {
     );
   }
 
-  const office = officeById(state.hamper.officeLocation);
+  const office = state.me?.officeLocation ? officeById(state.me.officeLocation) : null;
   const group = office ? CITY_GROUPS[office.city] : null;
 
   return (

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { OFFICE_LOCATION_IDS } from "@/lib/give-hamper";
 
 export const MAX_POINTS_PER_ENTRY = 1000;
 
@@ -27,13 +28,18 @@ const phoneSchema = z
   .transform(normalizeMobile)
   .pipe(z.string().regex(/^[6-9]\d{9}$/, "Enter a 10-digit mobile number"));
 
+export const officeLocationSchema = z.enum(OFFICE_LOCATION_IDS, { errorMap: () => ({ message: "Select your office location" }) });
+
 export const GameLoginSchema = z.object({ alias: aliasSchema });
 
 export const GameRegisterSchema = z.object({
   alias: aliasSchema,
   name: nameSchema,
   phone: phoneSchema,
+  officeLocation: officeLocationSchema.optional(),
 });
+
+export const OfficeRegisterSchema = GameRegisterSchema.extend({ officeLocation: officeLocationSchema });
 
 export const GAME_OPTIONS = [
   "Snake Ladder",

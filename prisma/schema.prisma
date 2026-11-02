@@ -332,6 +332,7 @@ model GameParticipant {
   alias     String      @id
   name      String
   phone     String?
+  officeLocation String?
   isAdmin   Boolean @default(false)
   createdAt DateTime    @default(now())
   scores    GameScore[]
@@ -539,7 +540,6 @@ model GameAudit {
 /// One acceptance per player; returning players update their hours on the same row.
 model GiveHamper {
   alias          String   @id
-  officeLocation String
   hoursTracked   Decimal  @default(0) @db.Decimal(6, 2)
   acceptedAt     DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
