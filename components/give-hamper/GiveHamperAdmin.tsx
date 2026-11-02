@@ -78,7 +78,7 @@ export function GiveHamperAdmin() {
 
   if (view.kind === "pin") return <PinForm name={view.name} onUnlocked={load} />;
 
-  return <HamperTable rows={view.rows} onLock={lock} onSaved={(row) => setView({ kind: "ready", rows: view.rows.map((item) => item.alias === row.alias ? row : item) })} />;
+  return <HamperTable rows={view.rows} onLock={lock} onSaved={(row) => setView({ kind: "ready", rows: view.rows.map((item) => (row.id && item.id === row.id) || (!item.id && item.alias === row.alias) ? row : item) })} />;
 }
 
 function PinForm({ name, onUnlocked }: { name: string; onUnlocked: () => Promise<void> }) {
@@ -195,13 +195,13 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
 
       <ul className="space-y-3 md:hidden">
         {pageRows.map((row) => (
-          <li key={row.alias} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <li key={row.id ?? row.alias} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate text-base font-semibold text-gray-900">{row.name}</p>
                 <p className="font-mono text-xs text-gray-400">{row.alias}</p>
               </div>
-              <p className="shrink-0 text-xs text-gray-500">{formatDate(row.registeredAt)}</p>
+              <p className="shrink-0 text-xs text-gray-500">{formatDate(row.entryDate)}</p>
             </div>
             <p className="mt-2 text-sm text-gray-600">{officeLabel(row) ?? "No office location"}</p>
             <div className="mt-3 border-t border-gray-100 pt-3">
@@ -216,19 +216,19 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
         <table className="w-full">
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
-              {["Name", "Registered", "Office location", "Hours logged"].map((heading) => (
+              {["Name", "Date", "Office location", "Hours logged"].map((heading) => (
                 <th key={heading} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{heading}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {pageRows.map((row) => (
-              <tr key={row.alias} className="align-top hover:bg-gray-50">
+              <tr key={row.id ?? row.alias} className="align-top hover:bg-gray-50">
                 <td className="px-4 py-3">
                   <p className="text-sm font-medium text-gray-800">{row.name}</p>
                   <p className="font-mono text-xs text-gray-400">{row.alias}</p>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{formatDate(row.registeredAt)}</td>
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{formatDate(row.entryDate)}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{officeLabel(row) ?? <span className="text-gray-400">—</span>}</td>
                 <td className="px-4 py-3"><HoursCell row={row} onSaved={onSaved} /></td>
               </tr>
@@ -273,7 +273,7 @@ function HoursCell({ row, onSaved }: { row: HamperAdminRow; onSaved: (row: Hampe
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (busy) return;
-    const parsed = AdminHamperHoursSchema.safeParse({ alias: row.alias, hoursTracked: hours });
+    const parsed = AdminHamperHoursSchema.safeParse({ alias: row.alias, id: row.id ?? undefined, hoursTracked: hours });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "Invalid hours");
     setBusy(true);
     setError("");

@@ -41,6 +41,11 @@ export function officeById(id: string) {
   return OFFICE_LOCATIONS.find((office) => office.id === id) ?? null;
 }
 
+// Hamper days follow India time, matching where the offices are.
+export function kolkataToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+}
+
 export type GiveHamperState = {
   me: { alias: string; name: string; phone: string | null; officeLocation: OfficeLocationId | null } | null;
   hamper: {
@@ -49,12 +54,14 @@ export type GiveHamperState = {
     updatedAt: string;
     treasureHuntAt: string | null;
   } | null;
+  lastHamper: { hoursTracked: number; hamperDate: string } | null;
 };
 
 export type HamperAdminRow = {
+  id: string | null;
   alias: string;
   name: string;
-  registeredAt: string;
+  entryDate: string;
   officeLocation: OfficeLocationId | null;
   hoursTracked: number | null;
 };

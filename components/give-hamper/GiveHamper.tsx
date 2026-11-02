@@ -170,7 +170,13 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
       {returning && (
         <p className="flex items-start gap-2 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          You accepted your Give Hamper on {new Date(hamper.acceptedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}. Update your committed hours below.
+          You accepted a Give Hamper today. Update today's committed hours below.
+        </p>
+      )}
+      {!returning && state.lastHamper && (
+        <p className="flex items-start gap-2 rounded-xl bg-blue-50 p-4 text-sm text-blue-900">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+          You logged {state.lastHamper.hoursTracked} {state.lastHamper.hoursTracked === 1 ? "hour" : "hours"} on {new Date(`${state.lastHamper.hamperDate}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}. Enter today's committed hours to take another Give Hamper.
         </p>
       )}
 

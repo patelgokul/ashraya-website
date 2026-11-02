@@ -17,6 +17,7 @@ export const GiveHamperSchema = z.object({
 
 export const AdminHamperHoursSchema = z.object({
   alias: z.string().trim().min(1).max(20),
+  id: z.string().trim().min(1).max(64).optional(),
   hoursTracked: hoursSchema,
 });
 

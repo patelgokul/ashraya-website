@@ -3,23 +3,29 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentParticipant } from "@/lib/games";
 import { GameError, checkOrigin, gameResponse, gameRoute, requirePlayer } from "@/lib/game-auth";
 import { GiveHamperSchema } from "@/lib/validations/give-hamper";
-import type { GiveHamperState, OfficeLocationId } from "@/lib/give-hamper";
+import { kolkataToday, type GiveHamperState, type OfficeLocationId } from "@/lib/give-hamper";
 
 export const dynamic = "force-dynamic";
 
 type Player = { alias: string; name: string; phone: string | null; officeLocation: string | null };
 
+function hamperDay(value: Date) {
+  return value.toISOString().slice(0, 10);
+}
+
 async function hamperState(player: Player | null): Promise<GiveHamperState> {
-  if (!player) return { me: null, hamper: null };
-  const hamper = await prisma.giveHamper.findUnique({ where: { alias: player.alias } });
+  if (!player) return { me: null, hamper: null, lastHamper: null };
+  const latest = await prisma.giveHamper.findFirst({ where: { alias: player.alias }, orderBy: { hamperDate: "desc" } });
+  const current = latest && hamperDay(latest.hamperDate) === kolkataToday() ? latest : null;
   return {
     me: { alias: player.alias, name: player.name, phone: player.phone, officeLocation: player.officeLocation as OfficeLocationId | null },
-    hamper: hamper && {
-      hoursTracked: Number(hamper.hoursTracked),
-      acceptedAt: new Date(hamper.acceptedAt).toISOString(),
-      updatedAt: new Date(hamper.updatedAt).toISOString(),
-      treasureHuntAt: hamper.treasureHuntAt && new Date(hamper.treasureHuntAt).toISOString(),
+    hamper: current && {
+      hoursTracked: Number(current.hoursTracked),
+      acceptedAt: new Date(current.acceptedAt).toISOString(),
+      updatedAt: new Date(current.updatedAt).toISOString(),
+      treasureHuntAt: current.treasureHuntAt && new Date(current.treasureHuntAt).toISOString(),
     },
+    lastHamper: latest && !current ? { hoursTracked: Number(latest.hoursTracked), hamperDate: hamperDay(latest.hamperDate) } : null,
   };
 }
 
@@ -40,11 +46,11 @@ export async function PUT(req: NextRequest) {
       await prisma.gameParticipant.update({ where: { alias: player.alias }, data: { phone, officeLocation } });
     }
 
-    // One statement, so a double tap or a second device can never create a duplicate row.
+    // One statement per India-time day, so a double tap updates today and tomorrow inserts a new row.
     await prisma.$executeRaw`
-      INSERT INTO "GiveHamper" (alias, "hoursTracked", "acceptedAt", "updatedAt")
-      VALUES (${player.alias}, ${data.hoursTracked}::numeric, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
-      ON CONFLICT (alias) DO UPDATE SET
+      INSERT INTO "GiveHamper" (id, alias, "hamperDate", "hoursTracked", "acceptedAt", "updatedAt")
+      VALUES (${crypto.randomUUID()}, ${player.alias}, (NOW() AT TIME ZONE 'Asia/Kolkata')::date, ${data.hoursTracked}::numeric, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
+      ON CONFLICT (alias, "hamperDate") DO UPDATE SET
         "hoursTracked" = EXCLUDED."hoursTracked",
         "updatedAt" = EXCLUDED."updatedAt"`;
 
@@ -59,7 +65,7 @@ export async function POST(req: NextRequest) {
     const player = await requirePlayer();
     const updated = await prisma.$executeRaw`
       UPDATE "GiveHamper" SET "treasureHuntAt" = COALESCE("treasureHuntAt", NOW() AT TIME ZONE 'UTC')
-      WHERE alias = ${player.alias}`;
+      WHERE alias = ${player.alias} AND "hamperDate" = (NOW() AT TIME ZONE 'Asia/Kolkata')::date`;
     if (!updated) throw new GameError("Accept your Give Hamper first", 409);
     return gameResponse(await hamperState(player));
   });

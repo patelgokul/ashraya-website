@@ -338,7 +338,7 @@ model GameParticipant {
   scores    GameScore[]
   registrations GameRegistration[]
   memberships TeamMember[]
-  giveHamper GiveHamper?
+  giveHampers GiveHamper[]
 }
 
 model GameScore {
@@ -537,14 +537,18 @@ model GameAudit {
 
 // ─── GIVE HAMPER ─────────────────────────────────
 
-/// One acceptance per player; returning players update their hours on the same row.
+/// One row per player per India-time day. Coming back the next day creates another row.
 model GiveHamper {
-  alias          String   @id
+  id             String   @id @default(cuid())
+  alias          String
+  hamperDate     DateTime @db.Date
   hoursTracked   Decimal  @default(0) @db.Decimal(6, 2)
   acceptedAt     DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
   treasureHuntAt DateTime?
   participant    GameParticipant @relation(fields: [alias], references: [alias], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([alias, hamperDate])
 }
 
 model GamePinAttempt {
