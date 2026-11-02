@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Clock3, LockKeyhole, Search, ShieldCheck } from "lucide-react";
 import { RegisterCard } from "@/components/games/RegisterCard";
-import { officeById, type HamperAdminRow } from "@/lib/give-hamper";
+import { OFFICE_LOCATIONS, officeById, type HamperAdminRow } from "@/lib/give-hamper";
 import { AdminHamperHoursSchema, MAX_HAMPER_HOURS } from "@/lib/validations/give-hamper";
 
 const inputClass =
@@ -122,13 +122,18 @@ function PinForm({ name, onUnlocked }: { name: string; onUnlocked: () => Promise
 
 function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock: () => Promise<void>; onSaved: (row: HamperAdminRow) => void }) {
   const [query, setQuery] = useState("");
+  const [office, setOffice] = useState("");
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return rows;
-    return rows.filter((row) => [row.name, row.alias, row.officeLocation ? officeById(row.officeLocation)?.label : ""]
-      .some((value) => value?.toLowerCase().includes(needle)));
-  }, [rows, query]);
-  const withHours = rows.filter((row) => row.hoursTracked !== null);
+    return rows.filter((row) => {
+      if (office === "none" && row.officeLocation) return false;
+      if (office && office !== "none" && row.officeLocation !== office) return false;
+      if (!needle) return true;
+      return [row.name, row.alias, row.officeLocation ? officeById(row.officeLocation)?.label : ""]
+        .some((value) => value?.toLowerCase().includes(needle));
+    });
+  }, [rows, query, office]);
+  const withHours = filtered.filter((row) => row.hoursTracked !== null);
   const totalHours = withHours.reduce((sum, row) => sum + (row.hoursTracked ?? 0), 0);
 
   return (
@@ -136,18 +141,28 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-gray-900">Give Hampers</h1>
-          <p className="text-sm text-gray-500">{rows.length} registered · {withHours.length} with hours · {totalHours} hours in total</p>
+          <p className="text-sm text-gray-500">{filtered.length} of {rows.length} registered · {withHours.length} with hours · {totalHours} hours in total</p>
         </div>
         <button onClick={onLock} title="Lock admin" aria-label="Lock admin" className="rounded-xl border border-gray-200 bg-white p-2.5 text-gray-600 hover:text-gray-900">
           <LockKeyhole className="h-4 w-4" />
         </button>
       </header>
 
-      <label className="relative block">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        <span className="sr-only">Search</span>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, alias, or office" className={`${inputClass} pl-10`} />
-      </label>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <label className="relative block flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <span className="sr-only">Search</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name or alias" className={`${inputClass} pl-10`} />
+        </label>
+        <label className="block sm:w-72">
+          <span className="sr-only">Filter by office location</span>
+          <select value={office} onChange={(event) => setOffice(event.target.value)} className={inputClass}>
+            <option value="">All office locations</option>
+            <option value="none">No office location</option>
+            {OFFICE_LOCATIONS.map((location) => <option key={location.id} value={location.id}>{location.label}</option>)}
+          </select>
+        </label>
+      </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
         <div className="overflow-x-auto">
