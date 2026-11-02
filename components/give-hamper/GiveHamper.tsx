@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarRange, CheckCircle2, Clock3, ExternalLink, LogOut, MapPin, Paintbrush } from "lucide-react";
+import { CalendarRange, CheckCircle2, Clock3, Download, ExternalLink, LogOut, MapPin, Paintbrush } from "lucide-react";
 import { useGiveHamper } from "@/hooks/useGiveHamper";
 import { GIVE_HAMPER, OFFICE_LOCATIONS, officeById, type GiveHamperState } from "@/lib/give-hamper";
 import { GiveHamperSchema, MAX_HAMPER_HOURS } from "@/lib/validations/give-hamper";
@@ -66,10 +66,10 @@ function KitStory({ brief = false }: { brief?: boolean }) {
       </div>
       {brief ? null : <>
 
-      <a href={GIVE_HAMPER.kitPdf} target="_blank" rel="noreferrer" className="block rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
-        <img src={GIVE_HAMPER.kitImage} alt="ĀSHRAYA × Microsoft Diwali volunteering kit card, with the contents, painting steps, and collection dates" className="w-full rounded-xl" />
+      <a href={GIVE_HAMPER.kitImage} download="ASHRAYA-Give-Hamper.png" className="block rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
+        <img src={GIVE_HAMPER.kitImage} alt="ĀSHRAYA × Microsoft Give Hamper poster, with the kit QR code and what is inside" className="w-full rounded-xl" />
         <span className="mt-3 inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-blue-700">
-          Open the kit card <ExternalLink className="h-3.5 w-3.5" />
+          Download the kit card <Download className="h-3.5 w-3.5" />
         </span>
       </a>
 

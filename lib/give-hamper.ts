@@ -27,8 +27,7 @@ export const GIVE_HAMPER = {
     process.env.NEXT_PUBLIC_BENEVITY_TIME_URL,
     "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D",
   ),
-  kitImage: "/images/give-hamper/diwali-kit.png",
-  kitPdf: env(process.env.NEXT_PUBLIC_GIVE_HAMPER_KIT_PDF, "/images/give-hamper/diwali-kit.pdf"),
+  kitImage: "/images/give-hamper/give-hamper-card.png",
 };
 
 export const TREASURE_HUNT = {
