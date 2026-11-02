@@ -209,7 +209,6 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
           <label htmlFor="hamper-hours" className="mb-1.5 block text-sm font-medium text-gray-700">Enter your committed hours</label>
           <input id="hamper-hours" type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25} value={hours} onChange={(event) => setHours(event.target.value)} placeholder="e.g. 15" className={inputClass} />
           {fieldErrors.hoursTracked && <p className="mt-1 text-xs text-red-500">{fieldErrors.hoursTracked}</p>}
-          <p className="mt-1.5 text-xs text-gray-500">You can come back later with your alias to update this.</p>
         </div>
       </section>
 
