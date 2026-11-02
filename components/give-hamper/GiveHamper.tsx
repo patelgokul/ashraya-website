@@ -213,6 +213,8 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
         </div>
       </section>
 
+      <TreasureHuntNotice />
+
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="flex items-center gap-2 font-display text-xl font-bold text-gray-900"><Clock3 className="h-5 w-5 text-blue-700" />Track your time</h2>
         <p className="mt-1 text-sm text-gray-600">Soaking, drying, and painting all count. Log that time on the Give portal. We save your committed hours as soon as you tap the button.</p>
@@ -227,8 +229,6 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
         <p className="mb-2 mt-5 text-sm text-gray-600">Link not opening? Copy it and open it in Microsoft Edge.</p>
         <CopyLink url={GIVE_HAMPER.benevityTimeUrl} onCopy={onCopyLink} />
       </section>
-
-      <TreasureHuntNotice />
     </form>
   );
 }
