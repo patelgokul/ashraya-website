@@ -15,7 +15,7 @@ export function MyScores({ scores }: { scores: MyScore[] }) {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
       <h3 className="font-semibold text-gray-900 px-5 py-4 border-b border-gray-100">Your Entries</h3>
       {scores.length === 0 ? (
-        <p className="px-5 py-6 text-sm text-gray-500">No points yet. Correct answers earn points.</p>
+        <p className="px-5 py-6 text-sm text-gray-500">No points yet. Add the points you scored.</p>
       ) : (
         <ul className="divide-y divide-gray-50 max-h-72 overflow-y-auto">
           {scores.map((score) => (

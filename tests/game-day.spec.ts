@@ -76,6 +76,7 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await page.getByLabel("Your name", { exact: true }).fill("Browser Player");
     await page.getByLabel("Contact number", { exact: true }).fill("9876543210");
     await page.getByRole("button", { name: "Register", exact: true }).click();
+    await page.getByRole("tab", { name: "Rounds", exact: true }).click();
     await expect(page.getByRole("heading", { name: "The playbook" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Log out", exact: true })).toBeVisible();
     const initial = await state();
@@ -87,6 +88,7 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     expect((await player.request.post(`${path}/scores`, { data: { points: 1000, game: "Song" } })).status()).toBe(403);
     expect((await player.request.get(`${path}/admin`)).status()).toBe(403);
     expect((await player.request.post("/api/games/events", { data: {} })).status()).toBe(403);
+    await page.getByRole("tab", { name: "Team", exact: true }).click();
     await page.getByLabel("Team name", { exact: true }).fill("Browser Team");
     await page.getByRole("button", { name: "Create", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Browser Team", exact: true })).toBeVisible();

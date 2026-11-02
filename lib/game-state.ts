@@ -36,14 +36,22 @@ export async function getGameState(eventId: string, player: GameParticipant | nu
   const event = await prisma.gameEvent.findUnique({ where: { id: eventId }, include: { rounds: { orderBy: { order: "asc" }, include: { questions: { orderBy: { order: "asc" } } } } } });
   if (!event) throw new GameError("Event not found", 404);
   if (player && !await prisma.gameRegistration.findUnique({ where: { eventId_alias: { eventId, alias: player.alias } } })) {
-    await prisma.gameRegistration.createMany({ data: [{ eventId, alias: player.alias }], skipDuplicates: true });
+    // createMany opens a transaction. The Neon HTTP driver used on Cloudflare rejects transactions.
+    try {
+      await prisma.gameRegistration.create({ data: { eventId, alias: player.alias } });
+    } catch (error) {
+      if ((error as { code?: string }).code !== "P2002") throw error;
+    }
   }
   const alias = player?.alias ?? "";
-  const [membership, verification, pledge, boards] = await Promise.all([
+  const manualEvent = event.rounds.length === 0;
+  const [membership, verification, pledge, boards, recentScores, myScores] = await Promise.all([
     prisma.teamMember.findUnique({ where: { eventId_alias: { eventId, alias } }, include: { team: { include: { progress: true } } } }),
     prisma.scoreVerification.findUnique({ where: { eventId_alias: { eventId, alias } } }),
     prisma.volunteerPledge.findUnique({ where: { eventId_alias: { eventId, alias } } }),
     getGameLeaderboard(eventId),
+    manualEvent ? prisma.gameScore.findMany({ where: { eventId, teamId: null, voidedAt: null }, orderBy: { createdAt: "desc" }, take: 15, select: { id: true, game: true, points: true, createdAt: true, participant: { select: { name: true } } } }) : Promise.resolve([]),
+    manualEvent && player ? prisma.gameScore.findMany({ where: { eventId, alias: player.alias, teamId: null, voidedAt: null }, orderBy: { createdAt: "desc" }, select: { id: true, game: true, points: true, createdAt: true } }) : Promise.resolve([]),
   ]);
   const teamId = membership?.teamId;
   const [attempts, scores] = await Promise.all([
@@ -94,7 +102,11 @@ export async function getGameState(eventId: string, player: GameParticipant | nu
   const inTeam = new Set(boards.teams.flatMap((team) => team.members.map((member) => member.alias)));
   return {
     serverNow: now.toISOString(),
-    event: { id: event.id, title: event.title, company: event.company, location: event.location, eventDate: event.eventDate.toISOString(), givingUrl: event.givingUrl, verificationFormUrl: event.verificationFormUrl, teamsLocked: !!event.teamsLockedAt, huntDeadlineAt: event.huntDeadlineAt?.toISOString() ?? null },
+    event: { id: event.id, title: event.title, company: event.company, location: event.location, eventDate: event.eventDate.toISOString(), games: event.games, givingUrl: event.givingUrl, verificationFormUrl: event.verificationFormUrl, teamsLocked: !!event.teamsLockedAt, huntDeadlineAt: event.huntDeadlineAt?.toISOString() ?? null },
+    manual: manualEvent ? {
+      recent: recentScores.map((score) => ({ id: score.id, participantName: score.participant.name, game: score.game, points: score.points, createdAt: score.createdAt.toISOString() })),
+      mine: myScores.map((score) => ({ id: score.id, game: score.game, points: score.points, createdAt: score.createdAt.toISOString() })),
+    } : null,
     me: player ? { alias, name: player.name, isAdmin: player.isAdmin } : null,
     rounds, boards, team: boards.teams.find((team) => team.id === teamId) ?? null,
     availablePlayers: boards.individual.filter((entry) => !inTeam.has(entry.alias)).map((entry) => ({ alias: entry.alias, name: entry.name })),
