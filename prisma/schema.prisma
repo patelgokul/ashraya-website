@@ -543,6 +543,7 @@ model GiveHamper {
   alias          String
   hamperDate     DateTime @db.Date
   hoursTracked   Decimal  @default(0) @db.Decimal(6, 2)
+  remark         String?  @db.VarChar(500)
   acceptedAt     DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
   treasureHuntAt DateTime?
