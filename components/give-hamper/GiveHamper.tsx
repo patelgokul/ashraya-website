@@ -220,7 +220,7 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
 
         <a href={GIVE_HAMPER.benevityTimeUrl} target="_blank" rel="noreferrer" onClick={onTrackClick} aria-disabled={busy}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3.5 text-sm font-bold text-white transition-colors hover:bg-blue-800 aria-disabled:opacity-60">
-          {busy ? "Saving your hours..." : "Track your time on Give portal"} <ExternalLink className="h-4 w-4" />
+          {busy ? "Saving your hours..." : "Submit and track your time on Give portal"} <ExternalLink className="h-4 w-4" />
         </a>
         {serverError && <p role="alert" className="mt-3 text-sm text-red-600">{serverError}</p>}
         {savedNotice && <p role="status" className="mt-3 flex items-center gap-1.5 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />Your committed hours are saved.</p>}
