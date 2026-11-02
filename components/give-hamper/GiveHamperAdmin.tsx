@@ -293,30 +293,30 @@ function HamperEditor({ row, onSaved, variant }: { row: HamperAdminRow; onSaved:
   }
 
   const unchanged = hours === savedHours && remark.trim() === savedRemark;
-  const hoursField = (
-    <div className="flex items-center gap-2">
-      {variant === "card" && <span className="sr-only">Hours logged</span>}
-      <input aria-label={`Hours for ${row.name}`} type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25}
-        value={hours} onChange={(event) => setHours(event.target.value)} placeholder="—" className={`${inputClass} w-full min-w-0 flex-1 px-3 py-2.5 md:w-24 md:flex-none md:shrink-0`} />
-      <button disabled={busy || hours.trim() === "" || unchanged} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
-    </div>
+  const hoursInput = (
+    <input aria-label={`Hours for ${row.name}`} type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25}
+      value={hours} onChange={(event) => setHours(event.target.value)} placeholder="—" className={`${inputClass} w-24 shrink-0 px-3 py-2.5`} />
   );
-  const remarkField = (
+  const remarkInput = (
     <input aria-label={`Remark for ${row.name}`} value={remark} maxLength={500} onChange={(event) => setRemark(event.target.value)} placeholder="Add a remark"
-      form={variant === "table" ? formId : undefined} className={`${inputClass} w-full min-w-48 px-3 py-2.5 md:w-56`} />
+      form={variant === "table" ? formId : undefined} className={`${inputClass} min-w-0 flex-1 px-3 py-2.5 md:w-56 md:flex-none`} />
+  );
+  const saveButton = (
+    <button form={variant === "table" ? formId : undefined} disabled={busy || hours.trim() === "" || unchanged} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
   );
 
   if (variant === "card") {
     return (
       <form onSubmit={save} className="space-y-3">
-        <div>
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-gray-500">Hours logged</p>
-          {hoursField}
-        </div>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-500">Hours logged</span>
+          {hoursInput}
+        </label>
         <label className="block">
           <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-500">Remark</span>
-          {remarkField}
+          {remarkInput}
         </label>
+        {saveButton}
         {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
       </form>
     );
@@ -325,12 +325,15 @@ function HamperEditor({ row, onSaved, variant }: { row: HamperAdminRow; onSaved:
   return (
     <>
       <td className="whitespace-nowrap px-4 py-3">
-        <form id={formId} onSubmit={save}>
-          {hoursField}
-          {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
-        </form>
+        <form id={formId} onSubmit={save}>{hoursInput}</form>
       </td>
-      <td className="px-4 py-3">{remarkField}</td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          {remarkInput}
+          {saveButton}
+        </div>
+        {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
+      </td>
     </>
   );
 }
