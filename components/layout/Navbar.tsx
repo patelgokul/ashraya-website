@@ -22,6 +22,7 @@ const navLinks = [
   { label: "Vision & Mission", href: "/vision-mission" },
   { label: "Volunteer", href: "/volunteer" },
   { label: "Events", href: "/games" },
+  { label: "Give Hampers", href: "/give-hampers" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -66,7 +67,7 @@ export function Navbar() {
                   onMouseEnter={() => setDropdownOpen(link.label)}
                   onMouseLeave={() => setDropdownOpen(null)}
                 >
-                  <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors">
+                  <button className="flex items-center gap-1 whitespace-nowrap px-2 xl:px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-colors">
                     {link.label}
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
@@ -96,8 +97,8 @@ export function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    pathname === link.href
+                  className={`whitespace-nowrap px-2 xl:px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    pathname.startsWith(link.href)
                       ? "text-blue-700 bg-blue-50"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
@@ -112,7 +113,7 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-2">
             <Link
               href="/donate"
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
+              className="flex items-center gap-2 whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
             >
               <Heart className="w-3.5 h-3.5" />
               Donate Now

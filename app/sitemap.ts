@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/projects", priority: 0.8, freq: "weekly" },
     { url: "/impact", priority: 0.8, freq: "monthly" },
     { url: "/volunteer", priority: 0.8, freq: "monthly" },
+    { url: "/give-hampers", priority: 0.7, freq: "weekly" },
     { url: "/donate", priority: 1.0, freq: "monthly" },
     { url: "/contact", priority: 0.7, freq: "monthly" },
     { url: "/gallery", priority: 0.6, freq: "monthly" },
