@@ -34,7 +34,7 @@ export function GiveHamper() {
     return (
       <div role="dialog" aria-modal="true" aria-label="Your Give Hamper" className="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/70 px-4 py-8">
         <div className="mx-auto max-w-2xl space-y-6">
-          <KitStory />
+          <KitStory brief />
           <RegisterCard company="Microsoft" intro={REGISTER_INTRO} onRegistered={refresh} />
           <p className="pb-6 text-center">
             <Link href="/" className="text-sm font-semibold text-white/90 underline-offset-4 hover:underline">Back to home</Link>
@@ -52,7 +52,7 @@ export function GiveHamper() {
   );
 }
 
-function KitStory() {
+function KitStory({ brief = false }: { brief?: boolean }) {
   return (
     <section className="space-y-4">
       <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
@@ -63,6 +63,7 @@ function KitStory() {
         </p>
         <p className="mt-2 text-sm font-semibold text-gray-900">Create with love, give with joy.</p>
       </div>
+      {brief ? null : <>
 
       <a href={GIVE_HAMPER.kitPdf} target="_blank" rel="noreferrer" className="block rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
         <img src={GIVE_HAMPER.kitImage} alt="ĀSHRAYA × Microsoft Diwali volunteering kit card, with the contents, painting steps, and collection dates" className="w-full rounded-xl" />
@@ -88,6 +89,7 @@ function KitStory() {
           <p className="mt-1 text-sm leading-relaxed text-gray-600">Collection drive: Wednesday 4 November to Friday 6 November 2026, at your ĀSHRAYA collection point.</p>
         </article>
       </div>
+      </>}
     </section>
   );
 }
