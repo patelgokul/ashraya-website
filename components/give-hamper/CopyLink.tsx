@@ -21,11 +21,12 @@ async function copyText(text: string) {
   }
 }
 
-export function CopyLink({ url }: { url: string }) {
+export function CopyLink({ url, onCopy: onCopied }: { url: string; onCopy?: () => void }) {
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
   const linkRef = useRef<HTMLInputElement>(null);
 
   async function onCopy() {
+    onCopied?.();
     const copied = await copyText(url);
     setStatus(copied ? "copied" : "failed");
     if (!copied) linkRef.current?.select();
@@ -39,7 +40,7 @@ export function CopyLink({ url }: { url: string }) {
           ref={linkRef}
           readOnly
           value={url}
-          aria-label="Benevity link"
+          aria-label="Give portal link"
           onFocus={(event) => event.currentTarget.select()}
           className="min-w-0 flex-1 bg-transparent px-2 font-mono text-xs text-gray-700 outline-none"
         />
