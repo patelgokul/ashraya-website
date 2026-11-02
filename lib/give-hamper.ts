@@ -63,4 +63,5 @@ export type HamperAdminRow = {
   entryDate: string;
   officeLocation: OfficeLocationId | null;
   hoursTracked: number | null;
+  remark: string | null;
 };

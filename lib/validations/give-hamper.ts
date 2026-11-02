@@ -19,6 +19,12 @@ export const AdminHamperHoursSchema = z.object({
   alias: z.string().trim().min(1).max(20),
   id: z.string().trim().min(1).max(64).optional(),
   hoursTracked: hoursSchema,
+  remark: z
+    .string()
+    .trim()
+    .max(500, "Remark can't exceed 500 characters")
+    .nullish()
+    .transform((value) => value || null),
 });
 
 export type GiveHamperInput = z.input<typeof GiveHamperSchema>;

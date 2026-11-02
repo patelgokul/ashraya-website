@@ -13,7 +13,7 @@ async function adminGate() {
   return { player };
 }
 
-type HamperEntry = { id: string; hoursTracked: unknown; hamperDate: Date };
+type HamperEntry = { id: string; hoursTracked: unknown; hamperDate: Date; remark: string | null };
 type ParticipantRow = {
   alias: string;
   name: string;
@@ -30,18 +30,19 @@ function toRows(participant: ParticipantRow): HamperAdminRow[] {
     entryDate: new Date(participant.createdAt).toISOString(),
   };
   if (!participant.giveHampers.length) {
-    return [{ ...shared, id: null, hoursTracked: null }];
+    return [{ ...shared, id: null, hoursTracked: null, remark: null }];
   }
   return participant.giveHampers.map((hamper) => ({
     ...shared,
     id: hamper.id,
     hoursTracked: Number(hamper.hoursTracked),
+    remark: hamper.remark,
   }));
 }
 
 const rowSelect = {
   alias: true, name: true, createdAt: true, officeLocation: true,
-  giveHampers: { select: { id: true, hoursTracked: true, hamperDate: true }, orderBy: { hamperDate: "desc" as const } },
+  giveHampers: { select: { id: true, hoursTracked: true, hamperDate: true, remark: true }, orderBy: { hamperDate: "desc" as const } },
 };
 
 export async function GET() {
@@ -64,18 +65,19 @@ export async function PUT(req: NextRequest) {
     if (!exists) throw new GameError("Participant not found", 404);
 
     if (data.id) {
-      const updated = await prisma.giveHamper.updateMany({ where: { id: data.id, alias: data.alias }, data: { hoursTracked: data.hoursTracked } });
+      const updated = await prisma.giveHamper.updateMany({ where: { id: data.id, alias: data.alias }, data: { hoursTracked: data.hoursTracked, remark: data.remark } });
       if (!updated.count) throw new GameError("Hamper entry not found", 404);
     } else {
       await prisma.$executeRaw`
-        INSERT INTO "GiveHamper" (id, alias, "hamperDate", "hoursTracked", "acceptedAt", "updatedAt")
-        VALUES (${crypto.randomUUID()}, ${data.alias}, (NOW() AT TIME ZONE 'Asia/Kolkata')::date, ${data.hoursTracked}::numeric, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
+        INSERT INTO "GiveHamper" (id, alias, "hamperDate", "hoursTracked", "remark", "acceptedAt", "updatedAt")
+        VALUES (${crypto.randomUUID()}, ${data.alias}, (NOW() AT TIME ZONE 'Asia/Kolkata')::date, ${data.hoursTracked}::numeric, ${data.remark}, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
         ON CONFLICT (alias, "hamperDate") DO UPDATE SET
           "hoursTracked" = EXCLUDED."hoursTracked",
+          "remark" = EXCLUDED."remark",
           "updatedAt" = EXCLUDED."updatedAt"`;
     }
     await prisma.gameAudit.create({
-      data: { actor: gate.player.alias, action: "hamper.hours", detail: { alias: data.alias, id: data.id ?? null, hoursTracked: data.hoursTracked } },
+      data: { actor: gate.player.alias, action: "hamper.hours", detail: { alias: data.alias, id: data.id ?? null, hoursTracked: data.hoursTracked, remark: data.remark } },
     });
 
     const participant = await prisma.gameParticipant.findUnique({ where: { alias: data.alias }, select: rowSelect });

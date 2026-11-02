@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS "GiveHamper" (
     "alias" TEXT NOT NULL,
     "hamperDate" DATE NOT NULL,
     "hoursTracked" DECIMAL(6,2) NOT NULL DEFAULT 0,
+    "remark" VARCHAR(500),
     "acceptedAt" TIMESTAMP(3) NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
     "treasureHuntAt" TIMESTAMP(3),
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS "GiveHamper" (
 );
 
 ALTER TABLE "GiveHamper" ADD COLUMN IF NOT EXISTS "treasureHuntAt" TIMESTAMP(3);
+ALTER TABLE "GiveHamper" ADD COLUMN IF NOT EXISTS "remark" VARCHAR(500);
 
 -- Workers deployed before the office moved to the participant still write "GiveHamper"."officeLocation",
 -- so deploy the new Worker right after running this.

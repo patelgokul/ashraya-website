@@ -136,7 +136,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
       if (office === "none" && row.officeLocation) return false;
       if (office && office !== "none" && row.officeLocation !== office) return false;
       if (!needle) return true;
-      return [row.name, row.alias, officeLabel(row)].some((value) => value?.toLowerCase().includes(needle));
+      return [row.name, row.alias, row.remark, officeLabel(row)].some((value) => value?.toLowerCase().includes(needle));
     });
   }, [rows, query, office]);
   const withHours = filtered.filter((row) => row.hoursTracked !== null);
@@ -205,8 +205,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
             </div>
             <p className="mt-2 text-sm text-gray-600">{officeLabel(row) ?? "No office location"}</p>
             <div className="mt-3 border-t border-gray-100 pt-3">
-              <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-gray-500">Hours logged</p>
-              <HoursCell row={row} onSaved={onSaved} />
+              <HamperEditor row={row} onSaved={onSaved} variant="card" />
             </div>
           </li>
         ))}
@@ -216,7 +215,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
         <table className="w-full">
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
-              {["Name", "Date", "Office location", "Hours logged"].map((heading) => (
+              {["Name", "Date", "Office location", "Hours logged", "Remark"].map((heading) => (
                 <th key={heading} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{heading}</th>
               ))}
             </tr>
@@ -230,7 +229,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{formatDate(row.entryDate)}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{officeLabel(row) ?? <span className="text-gray-400">—</span>}</td>
-                <td className="whitespace-nowrap px-4 py-3"><HoursCell row={row} onSaved={onSaved} /></td>
+                <HamperEditor row={row} onSaved={onSaved} variant="table" />
               </tr>
             ))}
           </tbody>
@@ -262,18 +261,22 @@ function Pager({ page, pageCount, from, to, total, onPage }: { page: number; pag
   );
 }
 
-function HoursCell({ row, onSaved }: { row: HamperAdminRow; onSaved: (row: HamperAdminRow) => void }) {
-  const saved = row.hoursTracked === null ? "" : String(row.hoursTracked);
-  const [hours, setHours] = useState(saved);
+function HamperEditor({ row, onSaved, variant }: { row: HamperAdminRow; onSaved: (row: HamperAdminRow) => void; variant: "card" | "table" }) {
+  const savedHours = row.hoursTracked === null ? "" : String(row.hoursTracked);
+  const savedRemark = row.remark ?? "";
+  const [hours, setHours] = useState(savedHours);
+  const [remark, setRemark] = useState(savedRemark);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const formId = `hamper-${row.id ?? row.alias}`;
 
-  useEffect(() => { setHours(saved); }, [saved]);
+  useEffect(() => { setHours(savedHours); }, [savedHours]);
+  useEffect(() => { setRemark(savedRemark); }, [savedRemark]);
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (busy) return;
-    const parsed = AdminHamperHoursSchema.safeParse({ alias: row.alias, id: row.id ?? undefined, hoursTracked: hours });
+    const parsed = AdminHamperHoursSchema.safeParse({ alias: row.alias, id: row.id ?? undefined, hoursTracked: hours, remark });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "Invalid hours");
     setBusy(true);
     setError("");
@@ -289,14 +292,45 @@ function HoursCell({ row, onSaved }: { row: HamperAdminRow; onSaved: (row: Hampe
     }
   }
 
+  const unchanged = hours === savedHours && remark.trim() === savedRemark;
+  const hoursField = (
+    <div className="flex items-center gap-2">
+      {variant === "card" && <span className="sr-only">Hours logged</span>}
+      <input aria-label={`Hours for ${row.name}`} type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25}
+        value={hours} onChange={(event) => setHours(event.target.value)} placeholder="—" className={`${inputClass} w-full min-w-0 flex-1 px-3 py-2.5 md:w-24 md:flex-none md:shrink-0`} />
+      <button disabled={busy || hours.trim() === "" || unchanged} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
+    </div>
+  );
+  const remarkField = (
+    <input aria-label={`Remark for ${row.name}`} value={remark} maxLength={500} onChange={(event) => setRemark(event.target.value)} placeholder="Add a remark"
+      form={variant === "table" ? formId : undefined} className={`${inputClass} w-full min-w-48 px-3 py-2.5 md:w-56`} />
+  );
+
+  if (variant === "card") {
+    return (
+      <form onSubmit={save} className="space-y-3">
+        <div>
+          <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-gray-500">Hours logged</p>
+          {hoursField}
+        </div>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-500">Remark</span>
+          {remarkField}
+        </label>
+        {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={save}>
-      <div className="flex items-center gap-2">
-        <input aria-label={`Hours for ${row.name}`} type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25}
-          value={hours} onChange={(event) => setHours(event.target.value)} placeholder="—" className={`${inputClass} w-full min-w-0 flex-1 px-3 py-2.5 md:w-24 md:flex-none md:shrink-0`} />
-        <button disabled={busy || hours.trim() === "" || hours === saved} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
-      </div>
-      {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
-    </form>
+    <>
+      <td className="whitespace-nowrap px-4 py-3">
+        <form id={formId} onSubmit={save}>
+          {hoursField}
+          {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
+        </form>
+      </td>
+      <td className="px-4 py-3">{remarkField}</td>
+    </>
   );
 }
