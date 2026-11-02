@@ -13,7 +13,7 @@ export async function GET(_request: Request, { params }: { params: { eventId: st
     if (!entry?.screenshotKey) throw new GameError("Screenshot not found", 404);
     const file = await readVerification(entry.screenshotKey);
     if (!file) throw new GameError("Screenshot not found", 404);
-    return new Response(file.body, {
+    return new Response(Uint8Array.from(file.body), {
       headers: {
         "Content-Type": file.contentType,
         "Content-Disposition": "inline",
