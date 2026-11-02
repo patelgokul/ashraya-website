@@ -337,6 +337,7 @@ model GameParticipant {
   scores    GameScore[]
   registrations GameRegistration[]
   memberships TeamMember[]
+  giveHamper GiveHamper?
 }
 
 model GameScore {
@@ -531,6 +532,18 @@ model GameAudit {
   detail Json
   createdAt DateTime @default(now())
   @@index([eventId, createdAt])
+}
+
+// ─── GIVE HAMPER ─────────────────────────────────
+
+/// One acceptance per player; returning players update their hours on the same row.
+model GiveHamper {
+  alias          String   @id
+  officeLocation String
+  hoursTracked   Decimal  @default(0) @db.Decimal(6, 2)
+  acceptedAt     DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  participant    GameParticipant @relation(fields: [alias], references: [alias], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model GamePinAttempt {

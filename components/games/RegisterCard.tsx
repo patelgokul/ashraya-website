@@ -6,7 +6,13 @@ import { GameLoginSchema, GameRegisterSchema } from "@/lib/validations/game";
 const inputClass =
   "w-full border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors";
 
-export function RegisterCard({ company, onRegistered }: { company: string; onRegistered: () => Promise<void> }) {
+type RegisterCardProps = {
+  company: string;
+  onRegistered: () => Promise<void>;
+  intro?: { register: string; login: string };
+};
+
+export function RegisterCard({ company, onRegistered, intro }: RegisterCardProps) {
   const [mode, setMode] = useState<"register" | "login">("register");
   const [alias, setAlias] = useState("");
   const [name, setName] = useState("");
@@ -71,7 +77,9 @@ export function RegisterCard({ company, onRegistered }: { company: string; onReg
       <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <h2 className="font-display text-2xl font-bold text-gray-900 mb-1">{registering ? "Register" : "Log in"}</h2>
         <p className="text-sm text-gray-500 mb-6">
-          {registering
+          {intro
+            ? registering ? intro.register : intro.login
+            : registering
             ? `Create your ${company} player profile. Your name is what other players see. Your ${company} alias is only for logging in.`
             : `Enter the ${company} alias you registered with. Anyone who knows it can sign in as you.`}
         </p>
