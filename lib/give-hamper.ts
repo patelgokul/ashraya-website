@@ -15,11 +15,11 @@ export type OfficeLocationId = (typeof OFFICE_LOCATIONS)[number]["id"];
 
 export const OFFICE_LOCATION_IDS = OFFICE_LOCATIONS.map((office) => office.id) as [OfficeLocationId, ...OfficeLocationId[]];
 
-// WhatsApp groups are city-wide, so both offices in a city share one link. Empty means "not shared yet".
+// WhatsApp groups are city-wide, so both offices in a city share one link.
 export const CITY_GROUPS: Record<HamperCity, { name: string; whatsappUrl: string }> = {
-  NOIDA: { name: "Noida", whatsappUrl: env(process.env.NEXT_PUBLIC_WHATSAPP_NOIDA, "") },
-  BENGALURU: { name: "Bengaluru", whatsappUrl: env(process.env.NEXT_PUBLIC_WHATSAPP_BENGALURU, "") },
-  HYDERABAD: { name: "Hyderabad", whatsappUrl: env(process.env.NEXT_PUBLIC_WHATSAPP_HYDERABAD, "") },
+  NOIDA: { name: "Noida", whatsappUrl: env(process.env.NEXT_PUBLIC_WHATSAPP_NOIDA, "https://chat.whatsapp.com/GX8cq4syWhKAARJljXZ07n") },
+  BENGALURU: { name: "Bengaluru", whatsappUrl: env(process.env.NEXT_PUBLIC_WHATSAPP_BENGALURU, "https://chat.whatsapp.com/EjDTEChSNWALd25T40ajX1") },
+  HYDERABAD: { name: "Hyderabad", whatsappUrl: env(process.env.NEXT_PUBLIC_WHATSAPP_HYDERABAD, "https://chat.whatsapp.com/FpCIpMWMRZHHH735wXAcxk") },
 };
 
 export const GIVE_HAMPER = {
@@ -33,7 +33,6 @@ export const GIVE_HAMPER = {
 
 export const TREASURE_HUNT = {
   enabled: env(process.env.NEXT_PUBLIC_TREASURE_HUNT_ENABLED, "true") === "true",
-  registerUrl: env(process.env.NEXT_PUBLIC_TREASURE_HUNT_URL, "/games"),
   date: env(process.env.NEXT_PUBLIC_TREASURE_HUNT_DATE, "This Wednesday"),
   time: env(process.env.NEXT_PUBLIC_TREASURE_HUNT_TIME, "To be announced"),
 };
@@ -44,5 +43,11 @@ export function officeById(id: string) {
 
 export type GiveHamperState = {
   me: { alias: string; name: string; phone: string | null } | null;
-  hamper: { officeLocation: OfficeLocationId; hoursTracked: number; acceptedAt: string; updatedAt: string } | null;
+  hamper: {
+    officeLocation: OfficeLocationId;
+    hoursTracked: number;
+    acceptedAt: string;
+    updatedAt: string;
+    treasureHuntAt: string | null;
+  } | null;
 };

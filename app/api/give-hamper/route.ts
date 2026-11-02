@@ -17,6 +17,7 @@ async function hamperState(player: { alias: string; name: string; phone: string 
       hoursTracked: Number(hamper.hoursTracked),
       acceptedAt: new Date(hamper.acceptedAt).toISOString(),
       updatedAt: new Date(hamper.updatedAt).toISOString(),
+      treasureHuntAt: hamper.treasureHuntAt && new Date(hamper.treasureHuntAt).toISOString(),
     },
   };
 }
@@ -45,5 +46,18 @@ export async function PUT(req: NextRequest) {
         "updatedAt" = EXCLUDED."updatedAt"`;
 
     return gameResponse(await hamperState({ ...player, phone: data.phone ?? player.phone }));
+  });
+}
+
+// Registers the signed-in employee for the Treasure Hunt; repeating it keeps the first time.
+export async function POST(req: NextRequest) {
+  return gameRoute(async () => {
+    checkOrigin(req);
+    const player = await requirePlayer();
+    const updated = await prisma.$executeRaw`
+      UPDATE "GiveHamper" SET "treasureHuntAt" = COALESCE("treasureHuntAt", NOW() AT TIME ZONE 'UTC')
+      WHERE alias = ${player.alias}`;
+    if (!updated) throw new GameError("Accept your Give Hamper first", 409);
+    return gameResponse(await hamperState(player));
   });
 }

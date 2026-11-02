@@ -543,6 +543,7 @@ model GiveHamper {
   hoursTracked   Decimal  @default(0) @db.Decimal(6, 2)
   acceptedAt     DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
+  treasureHuntAt DateTime?
   participant    GameParticipant @relation(fields: [alias], references: [alias], onDelete: Cascade, onUpdate: Cascade)
 }
 
