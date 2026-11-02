@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export const ADMIN_COOKIE = "ashraya_game_admin";
 
-export class GameError extends Error {
+export class GameError extends Error { 
   constructor(message: string, public status = 400) { super(message); }
 }
 
