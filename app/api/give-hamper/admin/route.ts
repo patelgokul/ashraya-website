@@ -35,7 +35,7 @@ function toRows(participant: ParticipantRow): HamperAdminRow[] {
   return participant.giveHampers.map((hamper) => ({
     ...shared,
     id: hamper.id,
-    hoursTracked: Number(hamper.hoursTracked),
+    hoursTracked: Number(hamper.hoursTracked) > 0 ? Number(hamper.hoursTracked) : null,
     remark: hamper.remark,
   }));
 }

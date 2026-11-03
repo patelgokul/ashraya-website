@@ -1,6 +1,5 @@
 "use client";
 import { useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock3, MessageCircle } from "lucide-react";
 import { useGiveHamper } from "@/hooks/useGiveHamper";
@@ -34,10 +33,8 @@ export function GiveHamperThanks() {
         <CheckCircle2 className="mx-auto h-9 w-9 text-emerald-600" />
         <h2 className="mt-2 font-display text-2xl font-bold text-gray-900">Thanks for accepting this Give Hamper!</h2>
         <p className="mt-2 text-sm text-emerald-900">
-          {state.me?.name}, you have committed <strong>{state.hamper.hoursTracked} {state.hamper.hoursTracked === 1 ? "hour" : "hours"}</strong>
-          {office && <> from {office.label}</>}.
+          {state.me?.name}, your Give Hamper is confirmed{office && <> from {office.label}</>}.
         </p>
-        <Link href="/give-hampers" className="mt-3 inline-block text-sm font-semibold text-blue-700 hover:underline">Update my committed hours</Link>
       </section>
 
       {group && (

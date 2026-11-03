@@ -139,7 +139,7 @@ function HamperTable({ rows, onLock, onSaved }: { rows: HamperAdminRow[]; onLock
       return [row.name, row.alias, row.remark, officeLabel(row)].some((value) => value?.toLowerCase().includes(needle));
     });
   }, [rows, query, office]);
-  const withHours = filtered.filter((row) => row.hoursTracked !== null);
+  const withHours = filtered.filter((row) => (row.hoursTracked ?? 0) > 0);
   const totalHours = withHours.reduce((sum, row) => sum + (row.hoursTracked ?? 0), 0);
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
@@ -262,7 +262,7 @@ function Pager({ page, pageCount, from, to, total, onPage }: { page: number; pag
 }
 
 function HamperEditor({ row, onSaved, variant }: { row: HamperAdminRow; onSaved: (row: HamperAdminRow) => void; variant: "card" | "table" }) {
-  const savedHours = row.hoursTracked === null ? "" : String(row.hoursTracked);
+  const savedHours = !row.hoursTracked ? "" : String(row.hoursTracked);
   const savedRemark = row.remark ?? "";
   const [hours, setHours] = useState(savedHours);
   const [remark, setRemark] = useState(savedRemark);
@@ -302,7 +302,7 @@ function HamperEditor({ row, onSaved, variant }: { row: HamperAdminRow; onSaved:
       form={variant === "table" ? formId : undefined} className={`${inputClass} min-w-0 flex-1 px-3 py-2.5 md:w-56 md:flex-none`} />
   );
   const saveButton = (
-    <button form={variant === "table" ? formId : undefined} disabled={busy || hours.trim() === "" || unchanged} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : row.hoursTracked === null ? "Add" : "Save"}</button>
+    <button form={variant === "table" ? formId : undefined} disabled={busy || hours.trim() === "" || unchanged} className={`${buttonClass} min-h-11 shrink-0 px-4`}>{busy ? "Saving" : savedHours ? "Save" : "Add"}</button>
   );
 
   if (variant === "card") {
