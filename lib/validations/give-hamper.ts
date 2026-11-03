@@ -11,7 +11,6 @@ const hoursSchema = z.coerce
 
 export const GiveHamperSchema = z.object({
   officeLocation: officeLocationSchema.optional(),
-  hoursTracked: hoursSchema,
   phone: GameRegisterSchema.shape.phone.optional(),
 });
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CalendarRange, CheckCircle2, Clock3, Download, ExternalLink, LogOut, MapPin, Paintbrush } from "lucide-react";
 import { useGiveHamper } from "@/hooks/useGiveHamper";
 import { GIVE_HAMPER, OFFICE_LOCATIONS, officeById, type GiveHamperState } from "@/lib/give-hamper";
-import { GiveHamperSchema, MAX_HAMPER_HOURS } from "@/lib/validations/give-hamper";
+import { GiveHamperSchema } from "@/lib/validations/give-hamper";
 import { RegisterCard } from "@/components/games/RegisterCard";
 import { CopyLink } from "./CopyLink";
 import { TreasureHuntNotice } from "./TreasureHuntNotice";
@@ -101,7 +101,6 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
   const hamper = state.hamper;
   const [officeLocation, setOfficeLocation] = useState("");
   const savedOffice = me.officeLocation ? officeById(me.officeLocation) : null;
-  const [hours, setHours] = useState(hamper ? String(hamper.hoursTracked) : "");
   const [phone, setPhone] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState("");
@@ -115,7 +114,6 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
     setServerError("");
     const parsed = GiveHamperSchema.safeParse({
       officeLocation: savedOffice ? undefined : officeLocation,
-      hoursTracked: hours,
       phone: me.phone ? undefined : phone,
     });
     if (!parsed.success) {
@@ -137,7 +135,7 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
         body: JSON.stringify(data),
       });
       const body = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(body?.error ?? "Could not save your hours. Please try again.");
+      if (!res.ok) throw new Error(body?.error ?? "Could not save. Please try again.");
       if (goToThanks) return router.push("/give-hampers/thank-you");
       setSavedNotice(true);
     } catch (failure) {
@@ -170,13 +168,13 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
       {returning && (
         <p className="flex items-start gap-2 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          You accepted a Give Hamper today. Update today's committed hours below.
+          You accepted a Give Hamper today.
         </p>
       )}
       {!returning && state.lastHamper && (
         <p className="flex items-start gap-2 rounded-xl bg-blue-50 p-4 text-sm text-blue-900">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          You logged {state.lastHamper.hoursTracked} {state.lastHamper.hoursTracked === 1 ? "hour" : "hours"} on {new Date(`${state.lastHamper.hamperDate}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}. Enter today's committed hours to take another Give Hamper.
+          You took a Give Hamper on {new Date(`${state.lastHamper.hamperDate}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}. You can take another one today.
         </p>
       )}
 
@@ -211,25 +209,20 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
           </div>
         )}
 
-        <div className="mt-5">
-          <label htmlFor="hamper-hours" className="mb-1.5 block text-sm font-medium text-gray-700">Enter your committed hours</label>
-          <input id="hamper-hours" type="number" inputMode="decimal" min={0.25} max={MAX_HAMPER_HOURS} step={0.25} value={hours} onChange={(event) => setHours(event.target.value)} placeholder="e.g. 15" className={inputClass} />
-          {fieldErrors.hoursTracked && <p className="mt-1 text-xs text-red-500">{fieldErrors.hoursTracked}</p>}
-        </div>
       </section>
 
       <TreasureHuntNotice />
 
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="flex items-center gap-2 font-display text-xl font-bold text-gray-900"><Clock3 className="h-5 w-5 text-blue-700" />Track your time</h2>
-        <p className="mt-1 text-sm text-gray-600">Soaking, drying, and painting all count. Log that time on the Give portal. We save your committed hours as soon as you tap the button.</p>
+        <p className="mt-1 text-sm text-gray-600">Soaking, drying, and painting all count. Log that time on the Give portal.</p>
 
         <a href={GIVE_HAMPER.benevityTimeUrl} target="_blank" rel="noreferrer" onClick={onTrackClick} aria-disabled={busy}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3.5 text-sm font-bold text-white transition-colors hover:bg-blue-800 aria-disabled:opacity-60">
-          {busy ? "Saving your hours..." : "Submit and track your time on Give portal"} <ExternalLink className="h-4 w-4" />
+          {busy ? "Saving..." : "Track your time on Give portal"} <ExternalLink className="h-4 w-4" />
         </a>
         {serverError && <p role="alert" className="mt-3 text-sm text-red-600">{serverError}</p>}
-        {savedNotice && <p role="status" className="mt-3 flex items-center gap-1.5 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />Your committed hours are saved.</p>}
+        {savedNotice && <p role="status" className="mt-3 flex items-center gap-1.5 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />You're set for today's Give Hamper.</p>}
 
         <p className="mb-2 mt-5 text-sm text-gray-600">Link not opening? Copy it and open it in Microsoft Edge.</p>
         <CopyLink url={GIVE_HAMPER.benevityTimeUrl} onCopy={onCopyLink} />

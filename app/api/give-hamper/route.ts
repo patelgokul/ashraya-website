@@ -46,12 +46,11 @@ export async function PUT(req: NextRequest) {
       await prisma.gameParticipant.update({ where: { alias: player.alias }, data: { phone, officeLocation } });
     }
 
-    // One statement per India-time day, so a double tap updates today and tomorrow inserts a new row.
+    // One row per India-time day. Hours stay at 0 until an admin records them, and a repeat visit does not wipe those hours.
     await prisma.$executeRaw`
       INSERT INTO "GiveHamper" (id, alias, "hamperDate", "hoursTracked", "acceptedAt", "updatedAt")
-      VALUES (${crypto.randomUUID()}, ${player.alias}, (NOW() AT TIME ZONE 'Asia/Kolkata')::date, ${data.hoursTracked}::numeric, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
+      VALUES (${crypto.randomUUID()}, ${player.alias}, (NOW() AT TIME ZONE 'Asia/Kolkata')::date, 0, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
       ON CONFLICT (alias, "hamperDate") DO UPDATE SET
-        "hoursTracked" = EXCLUDED."hoursTracked",
         "updatedAt" = EXCLUDED."updatedAt"`;
 
     return gameResponse(await hamperState({ ...player, phone, officeLocation }));
