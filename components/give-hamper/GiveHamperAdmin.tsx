@@ -19,7 +19,12 @@ type View =
   | { kind: "ready"; rows: HamperAdminRow[] };
 
 const PAGE_SIZE = 20;
-const formatDate = (value: string) => new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+function formatDate(value: string) {
+  const date = new Date(value);
+  const day = date.toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" });
+  const time = date.toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit", hour12: true });
+  return `${day}, ${time}`;
+}
 
 export function GiveHamperAdmin() {
   const [view, setView] = useState<View>({ kind: "loading" });
