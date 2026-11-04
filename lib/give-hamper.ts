@@ -25,7 +25,7 @@ export const CITY_GROUPS: Record<HamperCity, { name: string; whatsappUrl: string
 export const GIVE_HAMPER = {
   benevityTimeUrl: env(
     process.env.NEXT_PUBLIC_BENEVITY_TIME_URL,
-    "https://microsoft.benevity.org/cause/356-5501917747757_1ec1/project/60EX9W3L5D",
+    "https://microsoft.benevity.org/cause/356-5474803397670_fe1e/project/67RMZ2FK3R",
   ),
   kitImage: "/images/give-hamper/diwali-kit.png",
 };

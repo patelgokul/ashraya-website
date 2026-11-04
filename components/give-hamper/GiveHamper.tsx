@@ -8,7 +8,6 @@ import { GIVE_HAMPER, OFFICE_LOCATIONS, officeById, type GiveHamperState } from 
 import { GiveHamperSchema } from "@/lib/validations/give-hamper";
 import { RegisterCard } from "@/components/games/RegisterCard";
 import { CopyLink } from "./CopyLink";
-import { TreasureHuntNotice } from "./TreasureHuntNotice";
 
 const inputClass =
   "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm";
@@ -210,8 +209,6 @@ function AcceptanceForm({ state, onLoggedOut }: { state: GiveHamperState; onLogg
         )}
 
       </section>
-
-      <TreasureHuntNotice />
 
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="flex items-center gap-2 font-display text-xl font-bold text-gray-900"><Clock3 className="h-5 w-5 text-blue-700" />Track your time</h2>

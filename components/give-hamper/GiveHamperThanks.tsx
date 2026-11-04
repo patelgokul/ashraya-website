@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock3, MessageCircle } from "lucide-react";
 import { useGiveHamper } from "@/hooks/useGiveHamper";
 import { CITY_GROUPS, officeById } from "@/lib/give-hamper";
-import { TreasureHuntNotice } from "./TreasureHuntNotice";
 
 export function GiveHamperThanks() {
   const router = useRouter();
@@ -50,7 +49,6 @@ export function GiveHamperThanks() {
         </section>
       )}
 
-      <TreasureHuntNotice />
     </div>
   );
 }
