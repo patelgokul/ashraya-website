@@ -8,6 +8,7 @@ const eventId = `browser-${suffix}`;
 const playerAlias = `player_${suffix}`;
 const teammateAlias = `mate_${suffix}`;
 const hostAlias = `host_${suffix}`;
+const lateAliases = [`late_${suffix}`, `latecap_${suffix}`];
 const path = `/api/games/events/${eventId}`;
 
 test.beforeAll(async () => {
@@ -32,7 +33,7 @@ test.afterAll(async () => {
   await database.volunteerPledge.deleteMany({ where: { eventId } });
   await database.gameEvent.deleteMany({ where: { id: eventId } });
   await database.gamePinAttempt.deleteMany({ where: { alias: hostAlias } });
-  await database.gameParticipant.deleteMany({ where: { alias: { in: [playerAlias, teammateAlias, hostAlias] } } });
+  await database.gameParticipant.deleteMany({ where: { alias: { in: [playerAlias, teammateAlias, hostAlias, ...lateAliases] } } });
   await database.$disconnect();
 });
 
@@ -76,7 +77,7 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await page.getByLabel("Your name", { exact: true }).fill("Browser Player");
     await page.getByLabel("Contact number", { exact: true }).fill("9876543210");
     await page.getByRole("button", { name: "Register", exact: true }).click();
-    await page.getByRole("tab", { name: "Rounds", exact: true }).click();
+    await page.getByRole("tab", { name: /^rounds$/i }).click();
     await expect(page.getByRole("heading", { name: "The playbook" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Log out", exact: true })).toBeVisible();
     const initial = await state();
@@ -88,7 +89,7 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     expect((await player.request.post(`${path}/scores`, { data: { points: 1000, game: "Song" } })).status()).toBe(403);
     expect((await player.request.get(`${path}/admin`)).status()).toBe(403);
     expect((await player.request.post("/api/games/events", { data: {} })).status()).toBe(403);
-    await page.getByRole("tab", { name: "Team", exact: true }).click();
+    await page.getByRole("tab", { name: /^team$/i }).click();
     await page.getByLabel("Team name", { exact: true }).fill("Browser Team");
     await page.getByRole("button", { name: "Create", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Browser Team", exact: true })).toBeVisible();
@@ -132,6 +133,15 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await answer(`${eventId}-r2-q0`, "moon");
     await admin({ action: "admin.round.open", roundId: `${eventId}-r3` });
     expect((await action(player, { action: "team.leave", teamId })).status()).toBe(409);
+    const [lateJoiner, lateCaptain] = await Promise.all(lateAliases.map(() => browser.newContext({ baseURL })));
+    for (const [index, context] of [lateJoiner, lateCaptain].entries()) {
+      await context.request.post("/api/games/register", { data: { alias: lateAliases[index], name: `Late ${index}`, phone: "9876543212" } });
+      await state(context);
+    }
+    expect((await action(lateJoiner, { action: "team.join", teamId })).ok()).toBeTruthy();
+    expect((await action(lateCaptain, { action: "team.create", name: "Late Team" })).ok()).toBeTruthy();
+    expect((await state(lateCaptain)).rounds[2].state).toBe("LIVE");
+    await Promise.all([lateJoiner.close(), lateCaptain.close()]);
     await action(player, { action: "hint", roundId: `${eventId}-r3`, hint: 1 });
     await action(teammate, { action: "hint", roundId: `${eventId}-r3`, hint: 2 });
     const hinted = (await state()).rounds[2];
@@ -146,31 +156,42 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
     await page.getByRole("button", { name: /06 Verify your score/ }).click();
+    await expect(page.getByLabel("Hours logged")).toHaveValue("2");
+    await page.getByRole("button", { name: "How to log" }).click();
+    await expect(page.getByRole("heading", { name: "How to log your hours" })).toBeVisible();
+    await expect(page.getByText("game for charity")).toBeVisible();
+    await page.getByRole("button", { name: "Close" }).click();
     await page.getByLabel("Hours logged").fill("1.5");
     await page.getByLabel("Confirmation screenshot").setInputFiles({ name: "shot.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64") });
     await page.getByRole("button", { name: "Submit screenshot" }).click();
-    await expect.poll(async () => (await state()).verification?.status).toBe("SUBMITTED");
+    await expect.poll(async () => (await state()).verification?.status).toBe("APPROVED");
+    await expect(page.getByText("Screenshot verified.", { exact: false })).toBeVisible();
+    await page.getByRole("button", { name: "Upload a different screenshot" }).click();
+    await expect(page.getByRole("button", { name: "Keep my current screenshot" })).toBeVisible();
+    await page.getByRole("button", { name: "Keep my current screenshot" }).click();
     expect((await state(teammate)).rounds[6].questions).toHaveLength(0);
     await answer(`${eventId}-r7-q0`, "key4_DemoOnlyToken00001_persons");
     const finish = await answer(`${eventId}-r8-q0`, "key5_DemoOnlyToken00001_world");
     expect(finish.finishPlace).toBe(1); expect(finish.bonus).toBe(500);
+    await expect(page.getByRole("heading", { name: "You won the Treasure Hunt!" })).toBeVisible({ timeout: 15000 });
+    await expect.poll(async () => page.locator(".hunt-winner canvas").evaluate((canvas) => {
+      const context = (canvas as HTMLCanvasElement).getContext("2d");
+      return !!context && context.getImageData(0, 0, (canvas as HTMLCanvasElement).width, (canvas as HTMLCanvasElement).height).data.some((value, index) => index % 4 === 3 && value > 0);
+    }), { timeout: 5000 }).toBeTruthy();
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: ".game-day/mobile-hunt-winner.png" });
+    await page.getByRole("heading", { name: "You won the Treasure Hunt!" }).click();
+    await expect(page.getByRole("heading", { name: "You won the Treasure Hunt!" })).not.toBeVisible();
     expect((await state(teammate)).rounds[7].questions).toHaveLength(0);
+    await admin({ action: "admin.verification", alias: playerAlias, status: "REJECTED", reason: "Wrong screenshot" });
+    expect((await state()).verification?.status).toBe("REJECTED");
+    expect((await state()).boards.individual.find((entry) => entry.alias === playerAlias)?.verified).toBeFalsy();
     await admin({ action: "admin.verification", alias: playerAlias, status: "APPROVED", reason: "Local rehearsal screenshot review" });
     expect((await state()).boards.individual.find((entry) => entry.alias === playerAlias)?.verified).toBeTruthy();
     for (const order of [9, 10, 11, 12, 13, 14, 15, 16]) {
       await admin({ action: "admin.round.open", roundId: `${eventId}-r${order}` });
       const questions = await database.gameQuestion.findMany({ where: { roundId: `${eventId}-r${order}` }, orderBy: { order: "asc" } });
-      if (order === 13) {
-        await page.reload();
-        await expect(page.locator('img[alt^="Question "]')).toHaveCount(10);
-        for (const image of await page.locator('img[alt^="Question "]').all()) {
-          await image.scrollIntoViewIfNeeded();
-          await expect.poll(async () => image.evaluate((element) => (element as HTMLImageElement).complete && (element as HTMLImageElement).naturalWidth > 0)).toBeTruthy();
-        }
-        await page.locator(`#round-${eventId}-r13`).scrollIntoViewIfNeeded();
-        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-        await page.screenshot({ path: ".game-day/mobile-scribble.png" });
-      }
+      expect(questions).toHaveLength(1);
       for (const question of questions) await answer(question.id, question.acceptedAnswers[0]);
     }
     await admin({ action: "admin.round.open", roundId: `${eventId}-r17` });
@@ -186,7 +207,7 @@ test("17-round website rehearsal, security, team gating and responsive UI", asyn
     await expect(page.getByText("Your volunteering preferences have been saved.")).toBeVisible();
     const final = await state();
     expect(final.rounds.filter((round) => round.state === "DONE")).toHaveLength(17);
-    expect(final.boards.individual.find((entry) => entry.alias === playerAlias)!.points).toBeLessThanOrEqual(12000);
+    expect(final.boards.individual.find((entry) => entry.alias === playerAlias)!.points).toBeLessThanOrEqual(18000);
     const csv = await host.request.get(`${path}/volunteers.csv`);
     expect(csv.ok()).toBeTruthy(); expect(await csv.text()).toContain("'=SUM(1,1)");
     expect((await player.request.get(`${path}/volunteers.csv`)).status()).toBe(403);

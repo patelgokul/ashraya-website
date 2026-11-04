@@ -16,6 +16,7 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:games": "tsx prisma/seed-game-day.ts",
+    "db:update:games": "tsx prisma/update-game-day-content.ts",
     "test:games": "tsx --test lib/game-rules.test.ts prisma/game-day.integration.test.ts",
     "test:games:db": "GAME_DB_TESTS=1 tsx --test prisma/game-day.integration.test.ts",
     "test:games:browser": "playwright test",

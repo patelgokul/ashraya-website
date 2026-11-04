@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { CheckCircle2, Crown, ExternalLink, LogOut, Plus, UserPlus, Users, X } from "lucide-react";
 import type { GameState } from "@/lib/game-state";
 import { gameFetch, type ActionResult } from "@/hooks/useGameState";
@@ -29,12 +30,12 @@ export function TeamPanel({ state, act }: { state: GameState; act: Act }) {
   return <section aria-label="My team" className="border-y border-gray-200 py-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h2 className="flex items-center gap-2 font-display text-xl font-bold"><Users className="h-5 w-5 text-blue-700" />{team?.name ?? "Your hunt team"}</h2>
-      <span className="text-xs font-semibold text-gray-500">{state.event.teamsLocked ? "Membership locked" : "Up to 5 players"}</span>
+      <span className="text-xs font-semibold text-gray-500">{state.event.teamsLocked ? "Membership locked" : state.event.huntDeadlineAt && team ? "Hunt started: ask the host to switch teams" : "Up to 5 players"}</span>
     </div>
     {team ? <>
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm"><strong>{team.points.toLocaleString()} pts</strong><span>{team.finishedAt ? `Finished #${team.finishPlace}` : `Level ${team.level}`}</span><span>{team.members.length}/5 members</span></div>
       <ul className="mt-3 divide-y divide-gray-100">{team.members.map((member) => <li key={member.alias} className="flex min-h-10 items-center gap-2 text-sm"><span className="min-w-0 break-words">{member.name}</span><Verified approved={member.verified} />{member.alias === team.captainAlias && <Crown className="h-4 w-4 text-amber-600" aria-label="Captain" />}
-        {!state.event.teamsLocked && (captain || member.alias === state.me?.alias) && <button title={member.alias === state.me?.alias ? "Leave team" : "Remove member"} aria-label={member.alias === state.me?.alias ? "Leave team" : `Remove ${member.name}`} disabled={busy} onClick={() => run({ action: "team.leave", teamId: team.id, alias: member.alias })} className="ml-auto inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold text-gray-600 hover:bg-red-50 hover:text-red-700">{member.alias === state.me?.alias ? <><LogOut className="h-4 w-4" />Leave</> : <X className="h-4 w-4" />}</button>}
+        {!state.event.teamsLocked && !state.event.huntDeadlineAt && (captain || member.alias === state.me?.alias) && <button title={member.alias === state.me?.alias ? "Leave team" : "Remove member"} aria-label={member.alias === state.me?.alias ? "Leave team" : `Remove ${member.name}`} disabled={busy} onClick={() => run({ action: "team.leave", teamId: team.id, alias: member.alias })} className="ml-auto inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold text-gray-600 hover:bg-red-50 hover:text-red-700">{member.alias === state.me?.alias ? <><LogOut className="h-4 w-4" />Leave</> : <X className="h-4 w-4" />}</button>}
       </li>)}</ul>
       {state.rounds.filter((round) => round.kind === "HUNT_LEVEL" && round.unlockedAt && !round.solvedAt).map((round) => <p key={round.id} className="mt-3 text-xs text-gray-500">{round.title} · {round.highestHint}/3 hints used</p>)}
     </> : !state.event.teamsLocked ? <form onSubmit={(event) => { event.preventDefault(); void run({ action: "team.create", name }); }} className="mt-4 flex gap-2"><input aria-label="Team name" required minLength={2} maxLength={30} value={name} onChange={(event) => setName(event.target.value)} placeholder="Team name" className={gameInput} /><button className={gameButton} disabled={busy}><Plus className="h-4 w-4" />Create</button></form> : <p className="mt-3 text-sm text-gray-600">Ask the host to add you to a team.</p>}
@@ -54,15 +55,41 @@ export function GameLeaderboards({ state }: { state: GameState }) {
   </section>;
 }
 
+function HowToLog({ url }: { url: string | null }) {
+  const steps = [
+    <>Open the {url ? <a href={url} target="_blank" rel="noreferrer" className="font-semibold text-blue-700 underline">Benevity Microsoft Give portal</a> : "Benevity Microsoft Give portal"}.</>,
+    "Log in with your Microsoft account.",
+    "The link opens our project directly. If it does not, open the link again after you log in.",
+    "Click Track time.",
+    <>Fill in the hours (for example 2). For what you did, write <strong>game for charity</strong>. The other fields can be No, or None of the above.</>,
+    "Click Confirm and Submit.",
+  ];
+  return <Dialog.Root>
+    <Dialog.Trigger type="button" className="inline-flex items-center gap-1 font-semibold text-blue-700">How to log</Dialog.Trigger>
+    <Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+      <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <Dialog.Title className="font-display text-xl font-bold text-gray-900">How to log your hours</Dialog.Title>
+          <Dialog.Close className="rounded-lg p-1.5 hover:bg-gray-100" aria-label="Close"><X className="h-4 w-4" /></Dialog.Close>
+        </div>
+        <Dialog.Description className="sr-only">Steps to log volunteering hours on the Benevity Microsoft Give portal.</Dialog.Description>
+        <ol className="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-gray-700">{steps.map((step, index) => <li key={index}>{step}</li>)}</ol>
+      </Dialog.Content>
+    </Dialog.Portal>
+  </Dialog.Root>;
+}
+
 export function VerificationForm({ state, refresh }: { state: GameState; refresh: () => Promise<void> }) {
-  const [hours, setHours] = useState(state.verification?.hours ?? 1);
+  const [hours, setHours] = useState(state.verification?.hours ?? 2);
   const [note, setNote] = useState(state.verification?.note ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [replacing, setReplacing] = useState(false);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
-  if (["APPROVED", "SUBMITTED"].includes(state.verification?.status ?? "")) return <div className="space-y-2 text-sm"><p className="flex items-center gap-2 font-semibold text-emerald-800"><CheckCircle2 className="h-5 w-5" />{state.verification?.status === "APPROVED" ? "Benevity approved. You are eligible for prizes." : "Screenshot submitted. Awaiting host approval."}</p><p>{state.verification?.hours} hours logged</p></div>;
+  if (!replacing && ["APPROVED", "SUBMITTED"].includes(state.verification?.status ?? "")) return <div className="space-y-2 text-sm"><p className="flex items-center gap-2 font-semibold text-emerald-800"><CheckCircle2 className="h-5 w-5" />Screenshot verified. Levels 4 and 5 are unlocked and you are eligible for prizes.</p><p>{state.verification?.hours} hours logged</p><button type="button" onClick={() => { setReplacing(true); setFile(null); setPreview(null); }} className="font-semibold text-blue-700 underline">Upload a different screenshot</button></div>;
   return <form className="max-w-lg space-y-4" onSubmit={async (event) => {
     event.preventDefault();
     if (busy) return;
@@ -76,17 +103,18 @@ export function VerificationForm({ state, refresh }: { state: GameState; refresh
       body.set("screenshot", screenshot);
       await gameFetch(`/api/games/events/${state.event.id}/verification`, { method: "POST", body });
       await refresh();
+      setReplacing(false);
     } catch (failure) { setError((failure as Error).message); } finally { setBusy(false); }
   }}>
-    {state.verification?.rejectReason && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{state.verification.rejectReason}</p>}
-    <div className="flex flex-wrap gap-4 text-sm font-semibold text-blue-700">{state.event.givingUrl && <a href={state.event.givingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1">Open Benevity <ExternalLink className="h-4 w-4" /></a>}</div>
-    <p className="text-sm text-gray-600">Log your hours in Benevity, then attach the confirmation screenshot here. The host reviews it before you are eligible for prizes.</p>
+    {state.verification?.status === "REJECTED" && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">The host could not accept your last screenshot{state.verification.rejectReason ? `: ${state.verification.rejectReason}` : "."} Please upload your Benevity confirmation again to unlock Levels 4 and 5.</p>}
+    <div className="flex flex-wrap gap-4 text-sm">{state.event.givingUrl && <a href={state.event.givingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-blue-700">Open Benevity <ExternalLink className="h-4 w-4" /></a>}<HowToLog url={state.event.givingUrl} /></div>
+    <p className="text-sm text-gray-600">Log your hours in Benevity, then attach the confirmation screenshot here. It is verified as soon as you upload it, so Levels 4 and 5 unlock straight away. The host may still check it and ask you to upload again.</p>
     <label className="block text-sm font-medium">Hours logged<input type="number" min="0.25" max="24" step="0.25" required value={hours} onChange={(event) => setHours(Number(event.target.value))} className={`${gameInput} mt-1`} /></label>
     <label className="block text-sm font-medium">Confirmation screenshot<input type="file" accept="image/jpeg,image/png,image/webp" required className={`${gameInput} mt-1`} onChange={(event) => { const next = event.target.files?.[0] ?? null; setFile(next); setPreview((current) => { if (current) URL.revokeObjectURL(current); return next ? URL.createObjectURL(next) : null; }); }} /></label>
     {preview && <img src={preview} alt="Screenshot preview" className="max-h-48 rounded-lg border border-gray-200" />}
     <label className="block text-sm font-medium">Note (optional)<textarea value={note} maxLength={500} onChange={(event) => setNote(event.target.value)} className={`${gameInput} mt-1`} /></label>
     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-    <button className={gameButton} disabled={busy}>{busy ? "Submitting..." : "Submit screenshot"}</button>
+    <div className="flex flex-wrap items-center gap-4"><button className={gameButton} disabled={busy}>{busy ? "Submitting..." : "Submit screenshot"}</button>{replacing && <button type="button" disabled={busy} onClick={() => setReplacing(false)} className="text-sm font-semibold text-gray-600 underline">Keep my current screenshot</button>}</div>
   </form>;
 }
 

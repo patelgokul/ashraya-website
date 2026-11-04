@@ -20,7 +20,6 @@ export async function POST(request: NextRequest, { params }: { params: { eventId
     if (!event) throw new GameError("Event not found", 404);
     if (!await prisma.gameRegistration.findUnique({ where: { eventId_alias: { eventId: event.id, alias: player.alias } } })) throw new GameError("Open this event before playing");
     const existing = await prisma.scoreVerification.findUnique({ where: { eventId_alias: { eventId: event.id, alias: player.alias } } });
-    if (existing?.status === "APPROVED") throw new GameError("This verification is already approved");
 
     const form = await request.formData();
     const hours = hoursSchema.parse(form.get("hours"));
@@ -38,8 +37,9 @@ export async function POST(request: NextRequest, { params }: { params: { eventId
     try {
       await prisma.scoreVerification.upsert({
         where: { eventId_alias: { eventId: event.id, alias: player.alias } },
-        create: { eventId: event.id, alias: player.alias, hours, note, screenshotKey: key, status: "SUBMITTED" },
-        update: { hours, note, screenshotKey: key, status: "SUBMITTED", rejectReason: null, reviewedBy: null, reviewedAt: null },
+        // Uploads count straight away; the host can still reject a wrong screenshot from the console.
+        create: { eventId: event.id, alias: player.alias, hours, note, screenshotKey: key, status: "APPROVED" },
+        update: { hours, note, screenshotKey: key, status: "APPROVED", rejectReason: null, reviewedBy: null, reviewedAt: null },
       });
     } catch (error) {
       await removeVerification(key).catch(() => undefined);

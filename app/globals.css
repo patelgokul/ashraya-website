@@ -37,9 +37,22 @@ body {
 }
 
 .game-answer-shake { animation: game-answer-shake 180ms ease-in-out; }
+
+@keyframes hunt-winner-pop {
+  0% { opacity: 0; transform: scale(0.6) translateY(30px); }
+  60% { opacity: 1; transform: scale(1.05) translateY(0); }
+  100% { transform: scale(1); }
+}
+@keyframes hunt-winner-glow {
+  0%, 100% { box-shadow: 0 0 40px 10px rgba(251, 191, 36, 0.45); transform: rotate(-4deg); }
+  50% { box-shadow: 0 0 90px 30px rgba(251, 191, 36, 0.75); transform: rotate(4deg); }
+}
+.hunt-winner { animation: hunt-winner-pop 300ms ease-out both; }
+.hunt-winner-card { animation: hunt-winner-pop 900ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 150ms both; }
+.hunt-winner-trophy { animation: hunt-winner-glow 2.4s ease-in-out infinite; }
 .game-day { letter-spacing: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .game-answer-shake { animation: none; }
+  .game-answer-shake, .hunt-winner, .hunt-winner-card, .hunt-winner-trophy { animation: none; }
   .game-day * { scroll-behavior: auto; transition: none; }
 }

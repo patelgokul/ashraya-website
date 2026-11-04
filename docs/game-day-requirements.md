@@ -90,11 +90,12 @@ Section 15 lists what must ship by Wednesday (P0) vs. what can wait.
 - **Add members:** the captain picks from a searchable list of **available players** (logged in for this event, not in any team). Max **5 including the captain**.
 - **[Default]** Adding is immediate; no invite or accept step. It's faster for a live event, and anyone added by mistake can leave.
 - **Join:** **[Default]** players can also join any team with open slots via a "Join" button, so they don't have to wait for a captain to find them.
-- **Leave:** any member can leave at any time **before the team lock** (below).
+- **Leave:** any member can leave **until the hunt starts** (below).
   - If the captain leaves, captaincy passes to the earliest-joined remaining member.
   - If the last member leaves, the team is deleted.
-- **Remove member:** the captain can remove members (before the lock).
-- **Team lock (important for fairness):** when admin opens **Treasure Hunt L1**, team membership locks. Otherwise a player could leave a slow team and join the leading team mid-hunt. After the lock, only an admin can move players.
+- **Remove member:** the captain can remove members (until the hunt starts).
+- **Late joiners:** once admin opens **Treasure Hunt L1**, players without a team can still create a team or join one with open slots. A new team starts at L1 with the shared hunt clock.
+- **No team hopping (fairness):** once the hunt has started, players cannot leave a team. Otherwise a player could leave a slow team and join the leading team mid-hunt. Only an admin can move players. The admin can also lock all team changes manually from the console.
 - **Auto-team (admin):** a button that groups all players without a team into random teams of up to 5, so no one is left out when the hunt starts.
 - A player joining a team (admin move after the lock) **inherits the team's hunt progress**.
 
@@ -261,7 +262,7 @@ A sticky timer in the top-right corner, always visible:
 - L1's `card` contains the hunt site URL; L2–L5 cards intentionally contain no links.
 
 #### 6.1.2 Hunt scoring
-- Per level: `maxPoints = 1000`, time-decayed from **the team's unlock time for that level** (§8), then × hint multiplier.
+- Per level, time-decayed from **the team's unlock time for that level** (§8), then × hint multiplier. The five levels are worth 500, 875, 1,250, 1,625 and 2,000.
 - **Finish bonus** when L5 is solved: 1st team **+500**, 2nd **+300**, 3rd **+150**. **[Default]**
 - Level points are awarded **once per team** (DB unique constraint on `(teamId, roundId)`).
 
@@ -410,7 +411,7 @@ points = round(maxPoints × factor × hintMultiplier)
 |---|---|---|---|---|---|
 | Song / Riddle | 1000 | 3 s | 20 s | 30% | 90 s |
 | Scribble (per image) | 200 | 5 s | 60 s | 30% | 3 min |
-| Hunt level | 1000 | 30 s | 4 min | 30% | until hunt deadline |
+| Hunt level | 500, then 875, 1,250, 1,625, 2,000 | 30 s | 4 min | 30% | until hunt deadline |
 
 **Worked examples, Song (1000 max):**
 
@@ -675,7 +676,7 @@ All under `/api/games`. Player routes require the alias cookie; admin routes req
 2. Share the game link and QR in the meeting (`public/games-qr.svg` exists).
 3. Players log in → form teams (5 min) → admin presses **Auto-team** for leftovers.
 4. Run sections in order: open each live round as the kid starts singing; close it after the window.
-5. Opening Hunt L1 **locks teams** and starts the hunt clock.
+5. Opening Hunt L1 starts the hunt clock. Late players can still create or join teams, but nobody can leave a team.
 6. Watch the live feed; manually award obvious near-misses.
 7. Approve Benevity screenshots in batches during songs/riddles.
 8. End: final reveal of the leaderboard (freeze optional), announce winners (✓ only), remind people about the volunteer form.
