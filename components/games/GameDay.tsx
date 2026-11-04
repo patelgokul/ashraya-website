@@ -36,9 +36,18 @@ export function GameDay({ eventId }: { eventId: string }) {
     previousLive.current = liveKey;
   }, [liveKey, live]);
   useEffect(() => { setMuted(localStorage.getItem("game-muted") === "true"); }, []);
+  const teamFinish = state?.team ? `${state.team.id}:${state.team.finishedAt ?? ""}` : undefined;
+  const previousFinish = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (teamFinish === undefined) return;
+    const before = previousFinish.current;
+    previousFinish.current = teamFinish;
+    if (before === undefined || before === teamFinish || !state?.team?.finishedAt || !state.team.finishPlace) return;
+    setCelebration((current) => current ?? { correct: true, points: state.team!.points, finishPlace: state.team!.finishPlace!, roundId: "" });
+  }, [teamFinish, state?.team]);
   useEffect(() => {
     if (!celebration) return;
-    const timer = window.setTimeout(() => { setCelebration(null); setAdvance(true); }, celebration.finishPlace ? 3500 : 2000);
+    const timer = window.setTimeout(() => { setCelebration(null); setAdvance(true); }, celebration.finishPlace ? 12000 : 2000);
     return () => clearTimeout(timer);
   }, [celebration]);
   useEffect(() => {
@@ -79,7 +88,7 @@ export function GameDay({ eventId }: { eventId: string }) {
         {tab === "team" && <TeamPanel state={state} act={act} />}
         {tab === "rounds" && <main className="min-w-0"><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-2xl font-bold">The playbook</h2><span className="text-xs font-semibold text-gray-500">{state.rounds.filter((round) => round.state === "DONE").length} / {state.rounds.length} complete</span></div>
           {state.rounds.map((round) => { const Icon = icons[round.kind]; const open = expanded.has(round.id); return <section id={`round-${round.id}`} key={round.id} className="scroll-mt-64 border-b border-gray-200 first:border-t">
-            <h3><button aria-expanded={open} aria-controls={`body-${round.id}`} onClick={() => setExpanded((current) => { const next = new Set(current); if (open) next.delete(round.id); else next.add(round.id); return next; })} className={`flex w-full items-center gap-3 px-2 py-5 text-left sm:gap-4 ${round.state === "LIVE" ? "bg-blue-50/60" : ""}`}><span className="w-6 shrink-0 font-mono text-xs text-gray-400">{String(round.order).padStart(2, "0")}</span><Icon className={`h-5 w-5 shrink-0 ${round.state === "DONE" ? "text-emerald-700" : round.state === "LOCKED" ? "text-gray-400" : "text-blue-700"}`} /><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold sm:text-base">{round.title}</span><span className="mt-1 flex items-center gap-1 text-xs font-normal text-gray-500">{round.state === "LOCKED" && <LockKeyhole className="h-3 w-3" />}{round.state === "DONE" && <CheckCircle2 className="h-3 w-3 text-emerald-700" />}{round.state === "LOCKED" ? round.lockedReason : round.state === "DONE" ? "Complete" : round.state === "LIVE" ? round.kind === "HUNT_LEVEL" ? "Team / Open" : ["VERIFY", "VOLUNTEER"].includes(round.kind) ? "Open" : "Live now" : "Closed"}</span></span>{round.points > 0 && <span className="shrink-0 text-xs font-bold text-emerald-700">+{round.points}</span>}<ChevronDown className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} /></button></h3>
+            <h3><button aria-expanded={open} aria-controls={`body-${round.id}`} onClick={() => setExpanded((current) => { const next = new Set(current); if (open) next.delete(round.id); else next.add(round.id); return next; })} className={`flex w-full items-center gap-3 px-2 py-5 text-left sm:gap-4 ${round.state === "LIVE" ? "bg-blue-50/60" : ""}`}><span className="w-6 shrink-0 font-mono text-xs text-gray-400">{String(round.order).padStart(2, "0")}</span><Icon className={`h-5 w-5 shrink-0 ${round.state === "DONE" ? "text-emerald-700" : round.state === "LOCKED" ? "text-gray-400" : "text-blue-700"}`} /><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold sm:text-base">{round.title}</span><span className="mt-1 flex items-center gap-1 text-xs font-normal text-gray-500">{round.state === "LOCKED" && <LockKeyhole className="h-3 w-3" />}{round.state === "DONE" && <CheckCircle2 className="h-3 w-3 text-emerald-700" />}{round.state === "LOCKED" ? round.lockedReason : round.state === "DONE" ? "Complete" : round.state === "LIVE" ? round.kind === "HUNT_LEVEL" ? `Team · up to ${round.maxPoints.toLocaleString()}` : ["VERIFY", "VOLUNTEER"].includes(round.kind) ? "Open" : "Live now" : "Closed"}</span></span>{round.points > 0 && <span className="shrink-0 text-xs font-bold text-emerald-700">+{round.points}</span>}<ChevronDown className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} /></button></h3>
             {open && <div id={`body-${round.id}`} className="px-3 pb-6 pt-4 sm:px-12">{round.state === "LOCKED" ? <p className="text-sm text-gray-500">{round.lockedReason}</p> : round.kind === "VERIFY" ? <VerificationForm state={state} refresh={refresh} /> : round.kind === "VOLUNTEER" ? <VolunteerForm state={state} refresh={refresh} /> : <RoundPanel round={round} now={now} act={act} onCorrect={(result) => { if (!result.alreadySolved) setCelebration({ ...result, roundId: round.id }); }} />}</div>}
           </section>; })}
           {!state.rounds.length && <p className="py-10 text-sm text-gray-500">The host has not published rounds for this event yet.</p>}
@@ -87,6 +96,6 @@ export function GameDay({ eventId }: { eventId: string }) {
       </div>
     </div>
     {regular && <AddPointsDialog eventId={eventId} games={state.event.games} open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} />}
-    {celebration && <Celebration points={(celebration.points ?? 0) + (celebration.bonus ?? 0)} finishPlace={celebration.finishPlace} teamName={state.team?.name} elapsedSec={state.team?.elapsedSec ?? undefined} muted={muted} />}
+    {celebration && <Celebration points={(celebration.points ?? 0) + (celebration.bonus ?? 0)} finishPlace={celebration.finishPlace} teamName={state.team?.name} elapsedSec={state.team?.elapsedSec ?? undefined} muted={muted} onClose={() => { setCelebration(null); setAdvance(true); }} />}
   </div>;
 }

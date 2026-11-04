@@ -105,7 +105,7 @@ There is no UI to grant administrator status. Alias login remains impersonable b
 
 The console supports round open/close/reopen/extend, paginated score awards and voids, team operations, hunt solve/reset/refund, individual verification reviews, recent attempts, global alias operations, and volunteer CSV export.
 
-- Open L1 to lock teams and start the 45-minute hunt. Later levels are team-paced, not manually opened in normal play.
+- Open L1 to start the 45-minute hunt. Late players can still create or join teams; leaving a team needs the host. Later levels are team-paced, not manually opened in normal play.
 - A round reopen restarts its clock but does not erase attempts or prior awards.
 - Score voids retain tombstones so a player cannot answer again to reclaim the points.
 - Hunt reset removes that level and subsequent progression, related awards/refunds, and the finish bonus. It does not retroactively rerank other teams. Use an audited adjustment if prize corrections are necessary.

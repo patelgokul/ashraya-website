@@ -39,7 +39,8 @@ BEGIN
   END IF;
 
   IF command IN ('team.create', 'team.join', 'team.leave', 'admin.team.create', 'admin.team.move', 'admin.team.disband', 'admin.team.rename', 'admin.team.auto', 'admin.team.lock') THEN
-    IF NOT admin_command AND event_row."teamsLockedAt" IS NOT NULL THEN RAISE EXCEPTION 'Teams are locked for the hunt'; END IF;
+    IF NOT admin_command AND event_row."teamsLockedAt" IS NOT NULL THEN RAISE EXCEPTION 'Teams are locked by the host'; END IF;
+    IF command = 'team.leave' AND event_row."huntDeadlineAt" IS NOT NULL THEN RAISE EXCEPTION 'The hunt has started. Ask the host to move you to another team.'; END IF;
     IF command = 'admin.team.lock' THEN
       UPDATE "GameEvent" SET "teamsLockedAt" = CASE WHEN (payload->>'locked')::boolean THEN now_at ELSE NULL END WHERE id = event_id;
       RETURN '{"ok":true}';
@@ -119,7 +120,7 @@ BEGIN
     ELSIF round_row.kind = 'HUNT_LEVEL' THEN
       IF event_row."huntDeadlineAt" IS NULL THEN
         IF round_row."order" <> (SELECT min("order") FROM "GameRound" WHERE "eventId" = event_id AND kind = 'HUNT_LEVEL') THEN RAISE EXCEPTION 'Open Hunt Level 1 first'; END IF;
-        UPDATE "GameEvent" SET "teamsLockedAt" = now_at, "huntDeadlineAt" = now_at + interval '45 minutes' WHERE id = event_id;
+        UPDATE "GameEvent" SET "huntDeadlineAt" = now_at + interval '45 minutes' WHERE id = event_id;
         UPDATE "GameRound" SET "openedAt" = now_at, "closedAt" = NULL WHERE "eventId" = event_id AND kind = 'HUNT_LEVEL';
         INSERT INTO "TeamLevelProgress" ("teamId", "roundId", "unlockedAt") SELECT id, round_row.id, now_at FROM "Team" WHERE "eventId" = event_id ON CONFLICT DO NOTHING;
       ELSE
